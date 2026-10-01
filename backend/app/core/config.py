@@ -10,6 +10,10 @@ class Settings(BaseSettings):
 
     jwt_secret: str = "change-me"
     jwt_algorithm: str = "HS256"
+    jwt_issuer: str = "bankguard-api"
+    jwt_audience: str = "bankguard-web"
+    
+    access_token_expire_minutes: int = 30
 
     frontend_origin: str = "http://localhost:3000"
 

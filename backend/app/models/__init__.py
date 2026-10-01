@@ -6,6 +6,7 @@ from app.models.fraud_score import FraudScore
 from app.models.investigation_case import InvestigationCase
 from app.models.login_event import LoginEvent
 from app.models.transaction import Transaction
+from app.models.staff_user import StaffUser
 
 __all__ = [
     "Account",
@@ -16,4 +17,5 @@ __all__ = [
     "Alert",
     "InvestigationCase",
     "AuditLog",
+    "StaffUser",
 ]
