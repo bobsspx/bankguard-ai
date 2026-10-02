@@ -36,6 +36,15 @@ scikit-learn
 Deployment:
 Vercel + API hosting + PostgreSQL
 
+## Current Features
+
+- Secure Next.js BFF authentication
+- HttpOnly JWT session cookie
+- Transaction monitoring dashboard
+- Transaction filtering
+- High-value transaction highlighting
+- Cross-border transaction monitoring
+
 ## Status
 
-Phase 4 — Transaction Monitoring
+Phase 4B — Transaction Monitoring Dashboard
