@@ -39,3 +39,23 @@ def test_reviewer_is_read_only():
         "reviewer",
         "cases.manage",
     )
+
+def test_fraud_analyst_can_read_transactions():
+    assert has_permission(
+        "fraud_analyst",
+        "transactions.read",
+    )
+
+
+def test_fraud_analyst_cannot_ingest_transactions():
+    assert not has_permission(
+        "fraud_analyst",
+        "transactions.ingest",
+    )
+
+
+def test_reviewer_can_read_transactions():
+    assert has_permission(
+        "reviewer",
+        "transactions.read",
+    )

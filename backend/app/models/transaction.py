@@ -3,8 +3,10 @@ from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import (
+    CheckConstraint,
     DateTime,
     ForeignKey,
+    Index,
     Numeric,
     String,
     func,
@@ -17,6 +19,50 @@ from app.db.base import Base
 
 class Transaction(Base):
     __tablename__ = "transactions"
+
+    __table_args__ = (
+        CheckConstraint(
+            "amount > 0",
+            name="ck_transactions_amount_positive",
+        ),
+        CheckConstraint(
+            "transaction_type IN ("
+            "'transfer', "
+            "'card_payment', "
+            "'cash_withdrawal', "
+            "'bill_payment'"
+            ")",
+            name="ck_transactions_type",
+        ),
+        CheckConstraint(
+            "channel IN ("
+            "'mobile', "
+            "'web', "
+            "'atm', "
+            "'branch', "
+            "'api'"
+            ")",
+            name="ck_transactions_channel",
+        ),
+        CheckConstraint(
+            "status IN ("
+            "'pending', "
+            "'completed', "
+            "'declined', "
+            "'reversed'"
+            ")",
+            name="ck_transactions_status",
+        ),
+        Index(
+            "ix_transactions_occurred_at",
+            "occurred_at",
+        ),
+        Index(
+            "ix_transactions_account_occurred_at",
+            "account_id",
+            "occurred_at",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),

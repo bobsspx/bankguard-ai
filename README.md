@@ -38,4 +38,4 @@ Vercel + API hosting + PostgreSQL
 
 ## Status
 
-Phase 1 — Project Foundation
+Phase 4 — Transaction Monitoring
