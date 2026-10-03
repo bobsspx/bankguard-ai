@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 from decimal import Decimal
+from typing import Any, List
 
 from sqlalchemy import (
     DateTime,
@@ -8,8 +9,12 @@ from sqlalchemy import (
     Numeric,
     String,
     func,
+    text,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import (
+    JSONB,
+    UUID,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -52,6 +57,17 @@ class FraudScore(Base):
     risk_level: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
+    )
+
+    rule_reasons: Mapped[
+        list[dict[str, Any]]
+    ] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=list,
+        server_default=text(
+            "'[]'::jsonb"
+        ),
     )
 
     model_version: Mapped[str] = mapped_column(
