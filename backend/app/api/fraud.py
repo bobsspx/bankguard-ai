@@ -21,8 +21,15 @@ from app.models.transaction import (
     Transaction,
 )
 from app.schemas.fraud import (
+    AlertFilters,
+    AlertPage,
+    AlertResponse,
     FraudBatchResponse,
+    FraudScoreFilters,
+    FraudScoreListItem,
+    FraudScorePage,
     FraudScoreResponse,
+    FraudSummaryResponse,
 )
 from app.services.audit import (
     write_audit_log,
@@ -33,6 +40,13 @@ from app.services.fraud_scoring import (
 )
 
 from app.models.fraud_score import FraudScore
+from typing import Annotated
+from fastapi import Query
+from app.services.fraud_monitoring import (
+    get_fraud_summary,
+    list_alerts,
+    list_fraud_scores,
+)
 
 
 router = APIRouter(
@@ -83,6 +97,231 @@ def build_response(
         ),
     )
 
+@router.get(
+    "/summary",
+    response_model=FraudSummaryResponse,
+)
+def read_fraud_summary(
+    db: Session = Depends(
+        get_db
+    ),
+
+    _user: StaffUser = Depends(
+        require_permission(
+            "fraud.read"
+        )
+    ),
+):
+    summary = get_fraud_summary(
+        db
+    )
+
+    return FraudSummaryResponse(
+        **summary
+    )
+
+
+@router.get(
+    "/scores",
+    response_model=FraudScorePage,
+)
+def read_fraud_scores(
+    filters: Annotated[
+        FraudScoreFilters,
+        Query(),
+    ],
+
+    db: Session = Depends(
+        get_db
+    ),
+
+    _user: StaffUser = Depends(
+        require_permission(
+            "fraud.read"
+        )
+    ),
+):
+    total, rows = (
+        list_fraud_scores(
+            db,
+            filters,
+        )
+    )
+
+    items = []
+
+    for (
+        fraud_score,
+        transaction,
+        account_ref,
+    ) in rows:
+        items.append(
+            FraudScoreListItem(
+                transaction_id=(
+                    transaction.id
+                ),
+
+                transaction_ref=(
+                    transaction
+                    .transaction_ref
+                ),
+
+                account_ref=(
+                    account_ref
+                ),
+
+                amount=(
+                    transaction.amount
+                ),
+
+                currency=(
+                    transaction.currency
+                ),
+
+                country_code=(
+                    transaction
+                    .country_code
+                ),
+
+                channel=(
+                    transaction.channel
+                ),
+
+                occurred_at=(
+                    transaction
+                    .occurred_at
+                ),
+
+                rule_score=(
+                    fraud_score
+                    .rule_score
+                ),
+
+                ml_score=(
+                    fraud_score
+                    .ml_score
+                ),
+
+                final_score=(
+                    fraud_score
+                    .final_score
+                ),
+
+                risk_level=(
+                    fraud_score
+                    .risk_level
+                ),
+
+                rule_reasons=(
+                    fraud_score
+                    .rule_reasons
+                ),
+
+                model_version=(
+                    fraud_score
+                    .model_version
+                ),
+
+                scored_at=(
+                    fraud_score
+                    .scored_at
+                ),
+            )
+        )
+
+    return FraudScorePage(
+        total=total,
+
+        limit=filters.limit,
+        offset=filters.offset,
+
+        items=items,
+    )
+
+
+@router.get(
+    "/alerts",
+    response_model=AlertPage,
+)
+def read_fraud_alerts(
+    filters: Annotated[
+        AlertFilters,
+        Query(),
+    ],
+
+    db: Session = Depends(
+        get_db
+    ),
+
+    _user: StaffUser = Depends(
+        require_permission(
+            "alerts.read"
+        )
+    ),
+):
+    total, rows = (
+        list_alerts(
+            db,
+            filters,
+        )
+    )
+
+    items = []
+
+    for (
+        alert,
+        transaction_ref,
+    ) in rows:
+        items.append(
+            AlertResponse(
+                id=alert.id,
+
+                transaction_id=(
+                    alert.transaction_id
+                ),
+
+                transaction_ref=(
+                    transaction_ref
+                ),
+
+                alert_type=(
+                    alert.alert_type
+                ),
+
+                severity=(
+                    alert.severity
+                ),
+
+                status=(
+                    alert.status
+                ),
+
+                title=(
+                    alert.title
+                ),
+
+                description=(
+                    alert.description
+                ),
+
+                created_at=(
+                    alert.created_at
+                ),
+
+                resolved_at=(
+                    alert.resolved_at
+                ),
+            )
+        )
+
+    return AlertPage(
+        total=total,
+
+        limit=filters.limit,
+        offset=filters.offset,
+
+        items=items,
+    )
 
 @router.post(
     "/score/{transaction_id}",
