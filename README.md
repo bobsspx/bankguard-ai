@@ -44,7 +44,16 @@ Vercel + API hosting + PostgreSQL
 - Transaction filtering
 - High-value transaction highlighting
 - Cross-border transaction monitoring
+- Explainable rule-based fraud scoring
+- High-value transaction detection
+- Cross-border transaction detection
+- Unusual-hour detection
+- Untrusted-device detection
+- Transaction velocity detection
+- Risk classification: low / medium / high / critical
+- Automatic fraud alert generation
+- Idempotent fraud scoring
 
 ## Status
 
-Phase 4B — Transaction Monitoring Dashboard
+Phase 5A — Explainable Fraud Rule Engine
