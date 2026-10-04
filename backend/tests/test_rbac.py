@@ -72,3 +72,9 @@ def test_reviewer_cannot_manage_alerts():
         "reviewer",
         "alerts.manage",
     )
+
+def test_fraud_analyst_can_manage_cases():
+    assert has_permission(
+        "fraud_analyst",
+        "cases.manage",
+    )
