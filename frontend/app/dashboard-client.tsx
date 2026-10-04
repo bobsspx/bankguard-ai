@@ -15,6 +15,8 @@ import type {
   TransactionPage,
 } from "@/lib/types";
 
+import Link from "next/link";
+
 
 type Filters = {
   account: string;
@@ -360,16 +362,16 @@ export default function DashboardClient() {
           </div>
 
           <nav>
-            <a
+            <Link
               className="active"
-              href="#monitoring"
+              href="/"
             >
               Transaction Monitoring
-            </a>
+            </Link>
 
-            <span>
+            <a href="/fraud">
               Fraud Alerts
-            </span>
+            </a>
 
             <span>
               Investigations

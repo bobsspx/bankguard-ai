@@ -702,6 +702,20 @@ td small {
 @media (
   max-width: 800px
 ) {
+    .fraudHeaderActions {
+    width: 100%;
+
+    align-items:
+      flex-start;
+
+    justify-content:
+      space-between;
+  }
+
+  .alertCardTop {
+    flex-direction:
+      column;
+  }
   .loginPage {
     grid-template-columns:
       1fr;
@@ -789,4 +803,383 @@ td small {
 
     letter-spacing: -3px;
   }
+}
+
+/* FRAUD MONITORING */
+
+.fraudHeaderActions {
+  display: flex;
+
+  align-items:
+    flex-end;
+
+  gap: 18px;
+}
+
+
+.refreshButton {
+  min-height: 40px;
+
+  padding:
+    0 16px;
+
+  border:
+    1px solid #2a3542;
+
+  border-radius: 8px;
+
+  background:
+    #10161d;
+
+  color:
+    #d7dde5;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+.refreshButton:hover {
+  border-color:
+    #496078;
+}
+
+
+.refreshButton:disabled {
+  opacity: 0.5;
+
+  cursor:
+    not-allowed;
+}
+
+
+.criticalMetric {
+  color:
+    var(--red);
+}
+
+
+.highMetric {
+  color:
+    var(--amber);
+}
+
+
+.fraudTable {
+  min-width:
+    1250px;
+}
+
+
+.criticalRow {
+  background:
+    rgba(
+      255,
+      107,
+      114,
+      0.045
+    );
+}
+
+
+.criticalRow td:first-child {
+  border-left:
+    2px solid
+    var(--red);
+}
+
+
+.highRiskRow {
+  background:
+    rgba(
+      241,
+      189,
+      91,
+      0.025
+    );
+}
+
+
+.highRiskRow td:first-child {
+  border-left:
+    2px solid
+    var(--amber);
+}
+
+
+.scoreCell {
+  display: flex;
+
+  align-items:
+    baseline;
+
+  gap: 4px;
+}
+
+
+.scoreCell strong {
+  font-size: 20px;
+}
+
+
+.scoreCell span {
+  color:
+    #626f7f;
+
+  font-size: 10px;
+}
+
+
+.riskBadge {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  padding:
+    5px 9px;
+
+  border-radius:
+    999px;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing:
+    1px;
+
+  text-transform:
+    uppercase;
+}
+
+
+.risk-critical {
+  color:
+    #ff858b;
+
+  border:
+    1px solid #71353a;
+
+  background:
+    rgba(
+      255,
+      107,
+      114,
+      0.08
+    );
+}
+
+
+.risk-high {
+  color:
+    #f1bd5b;
+
+  border:
+    1px solid #674f22;
+
+  background:
+    rgba(
+      241,
+      189,
+      91,
+      0.07
+    );
+}
+
+
+.risk-medium {
+  color:
+    #62b9ff;
+
+  border:
+    1px solid #2d5577;
+
+  background:
+    rgba(
+      98,
+      185,
+      255,
+      0.07
+    );
+}
+
+
+.risk-low {
+  color:
+    var(--green);
+
+  border:
+    1px solid #28523c;
+
+  background:
+    rgba(
+      84,
+      209,
+      140,
+      0.06
+    );
+}
+
+
+.ruleList {
+  max-width:
+    370px;
+
+  display:
+    flex;
+
+  flex-wrap:
+    wrap;
+
+  gap: 5px;
+}
+
+
+.ruleList span {
+  display:
+    inline-flex;
+
+  gap: 5px;
+
+  padding:
+    5px 7px;
+
+  border:
+    1px solid #28313b;
+
+  border-radius:
+    5px;
+
+  background:
+    #0d1218;
+
+  color:
+    #8793a2;
+
+  font-size: 9px;
+}
+
+
+.ruleList b {
+  color:
+    #cbd3dd;
+
+  font-weight: 700;
+}
+
+
+.alertList {
+  display: grid;
+}
+
+
+.alertCard {
+  padding:
+    23px 27px;
+
+  border-top:
+    1px solid var(--border);
+}
+
+
+.alertCard:first-child {
+  border-top: 0;
+}
+
+
+.alertCardTop {
+  display: flex;
+
+  align-items:
+    flex-start;
+
+  justify-content:
+    space-between;
+
+  gap: 25px;
+}
+
+
+.alertCardTop > div:first-child {
+  display: grid;
+
+  gap: 5px;
+}
+
+
+.alertCardTop strong {
+  color:
+    #e7ebf0;
+
+  font-size: 13px;
+}
+
+
+.alertCardTop span {
+  color:
+    #657284;
+
+  font-size: 10px;
+}
+
+
+.alertBadges {
+  display: flex;
+
+  align-items:
+    center;
+
+  gap: 7px;
+}
+
+
+.alertStatus {
+  padding:
+    5px 9px;
+
+  border:
+    1px solid #2a3541;
+
+  border-radius:
+    999px;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    1px;
+}
+
+
+.alertCard h3 {
+  margin:
+    18px 0 8px;
+
+  color:
+    #d8dee6;
+
+  font-size: 15px;
+}
+
+
+.alertCard p {
+  margin:
+    0 0 15px;
+
+  color:
+    #84909f;
+
+  font-size: 12px;
+
+  line-height: 1.6;
+}
+
+
+.alertCard small {
+  color:
+    #586474;
+
+  font-size: 10px;
 }
