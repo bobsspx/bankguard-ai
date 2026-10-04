@@ -59,3 +59,16 @@ def test_reviewer_can_read_transactions():
         "reviewer",
         "transactions.read",
     )
+
+def test_fraud_analyst_can_manage_alerts():
+    assert has_permission(
+        "fraud_analyst",
+        "alerts.manage",
+    )
+
+
+def test_reviewer_cannot_manage_alerts():
+    assert not has_permission(
+        "reviewer",
+        "alerts.manage",
+    )

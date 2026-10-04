@@ -24,6 +24,7 @@ from app.schemas.fraud import (
     AlertFilters,
     AlertPage,
     AlertResponse,
+    AlertTriageRequest,
     FraudBatchResponse,
     FraudScoreFilters,
     FraudScoreListItem,
@@ -46,6 +47,12 @@ from app.services.fraud_monitoring import (
     get_fraud_summary,
     list_alerts,
     list_fraud_scores,
+)
+
+from app.services.alert_triage import (
+    AlertNotFoundError,
+    InvalidAlertTransitionError,
+    triage_alert,
 )
 
 
@@ -321,6 +328,174 @@ def read_fraud_alerts(
         offset=filters.offset,
 
         items=items,
+    )
+
+@router.patch(
+    "/alerts/{alert_id}",
+    response_model=AlertResponse,
+)
+def update_fraud_alert(
+    alert_id: uuid.UUID,
+
+    payload: AlertTriageRequest,
+
+    request: Request,
+
+    db: Session = Depends(
+        get_db
+    ),
+
+    user: StaffUser = Depends(
+        require_permission(
+            "alerts.manage"
+        )
+    ),
+):
+    try:
+        (
+            alert,
+            previous_status,
+        ) = triage_alert(
+            db,
+            alert_id,
+            payload.status,
+        )
+
+    except AlertNotFoundError:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
+            detail=(
+                "Alert not found."
+            ),
+        )
+
+    except (
+        InvalidAlertTransitionError
+    ) as exc:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_409_CONFLICT
+            ),
+            detail=str(exc),
+        )
+
+    transaction_ref = None
+
+    if (
+        alert.transaction_id
+        is not None
+    ):
+        transaction_ref = (
+            db.scalar(
+                select(
+                    Transaction
+                    .transaction_ref
+                )
+                .where(
+                    Transaction.id
+                    == alert.transaction_id
+                )
+            )
+        )
+
+    client_ip = (
+        request.client.host
+        if request.client
+        else None
+    )
+
+    note = (
+        payload.note.strip()
+        if payload.note
+        else None
+    )
+
+    write_audit_log(
+        db,
+
+        actor_ref=user.email,
+
+        action=(
+            "ALERT_STATUS_UPDATED"
+        ),
+
+        resource_type="alert",
+
+        resource_id=str(
+            alert.id
+        ),
+
+        ip_address=client_ip,
+
+        details={
+            "previous_status":
+                previous_status,
+
+            "new_status":
+                alert.status,
+
+            "transaction_id":
+                (
+                    str(
+                        alert.transaction_id
+                    )
+                    if
+                    alert.transaction_id
+                    else None
+                ),
+
+            "transaction_ref":
+                transaction_ref,
+
+            "note":
+                note,
+        },
+    )
+
+    db.commit()
+
+    db.refresh(alert)
+
+    return AlertResponse(
+        id=alert.id,
+
+        transaction_id=(
+            alert.transaction_id
+        ),
+
+        transaction_ref=(
+            transaction_ref
+        ),
+
+        alert_type=(
+            alert.alert_type
+        ),
+
+        severity=(
+            alert.severity
+        ),
+
+        status=(
+            alert.status
+        ),
+
+        title=(
+            alert.title
+        ),
+
+        description=(
+            alert.description
+        ),
+
+        created_at=(
+            alert.created_at
+        ),
+
+        resolved_at=(
+            alert.resolved_at
+        ),
     )
 
 @router.post(

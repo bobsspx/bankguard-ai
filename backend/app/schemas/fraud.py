@@ -169,6 +169,17 @@ class AlertFilters(
         ge=0,
     )
 
+class AlertTriageRequest(
+    BaseModel
+):
+    status: AlertStatus
+
+    note: (
+        str | None
+    ) = Field(
+        default=None,
+        max_length=1000,
+    )
 
 class AlertResponse(
     BaseModel
