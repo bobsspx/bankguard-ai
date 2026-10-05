@@ -1183,3 +1183,601 @@ td small {
 
   font-size: 10px;
 }
+
+/* INVESTIGATION CASES */
+
+.caseMessage {
+  margin-top: 24px;
+}
+
+
+.caseSuccess {
+  padding: 15px;
+
+  border:
+    1px solid #28523c;
+
+  border-radius: 8px;
+
+  background:
+    rgba(
+      84,
+      209,
+      140,
+      0.06
+    );
+
+  color:
+    var(--green);
+}
+
+
+.caseCreateBanner {
+  margin-top: 30px;
+
+  padding: 25px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content:
+    space-between;
+
+  gap: 30px;
+
+  border:
+    1px solid #315375;
+
+  border-radius: 12px;
+
+  background:
+    rgba(
+      98,
+      185,
+      255,
+      0.05
+    );
+}
+
+
+.caseCreateBanner h2 {
+  margin:
+    7px 0 10px;
+
+  font-size: 25px;
+}
+
+
+.caseCreateBanner p {
+  margin: 0;
+
+  color: #778596;
+
+  font-size: 12px;
+}
+
+
+.caseCreateBanner code {
+  color:
+    var(--cyan);
+}
+
+
+.caseCreateButton {
+  min-width: 190px;
+
+  padding:
+    0 22px;
+}
+
+
+.caseFilterBar {
+  padding: 18px;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr auto auto;
+
+  gap: 10px;
+
+  border-bottom:
+    1px solid var(--border);
+}
+
+
+.caseFilterBar select,
+.caseEditor select,
+.caseEditor input,
+.caseEditor textarea {
+  width: 100%;
+
+  padding: 13px 14px;
+
+  border:
+    1px solid #27323e;
+
+  border-radius: 8px;
+
+  outline: 0;
+
+  background:
+    #0e1319;
+
+  color:
+    #e8edf3;
+}
+
+
+.caseFilterBar select:focus,
+.caseEditor select:focus,
+.caseEditor input:focus,
+.caseEditor textarea:focus {
+  border-color:
+    #476889;
+}
+
+
+.caseTable {
+  min-width:
+    1050px;
+}
+
+
+.caseTable tbody tr {
+  cursor:
+    pointer;
+
+  transition:
+    background
+    120ms ease;
+}
+
+
+.caseTable tbody tr:hover {
+  background:
+    #0e141b;
+}
+
+
+.selectedCaseRow {
+  background:
+    rgba(
+      98,
+      185,
+      255,
+      0.05
+    );
+}
+
+
+.selectedCaseRow td:first-child {
+  border-left:
+    2px solid
+    var(--cyan);
+}
+
+
+.casePriority {
+  display:
+    inline-flex;
+
+  padding:
+    5px 9px;
+
+  border-radius:
+    999px;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+
+  text-transform:
+    uppercase;
+}
+
+
+.caseStatus {
+  display:
+    inline-flex;
+
+  padding:
+    5px 9px;
+
+  border:
+    1px solid #2d3844;
+
+  border-radius:
+    999px;
+
+  color:
+    #98a5b4;
+
+  background:
+    #0c1117;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+}
+
+
+.caseStatus-open {
+  color:
+    #62b9ff;
+
+  border-color:
+    #2d5577;
+}
+
+
+.caseStatus-investigating {
+  color:
+    var(--amber);
+
+  border-color:
+    #674f22;
+}
+
+
+.caseStatus-pending_review {
+  color:
+    #bd9cff;
+
+  border-color:
+    #554174;
+}
+
+
+.caseStatus-closed {
+  color:
+    var(--green);
+
+  border-color:
+    #28523c;
+}
+
+
+.caseWorkspace {
+  margin-top: 35px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 12px;
+
+  background:
+    var(--surface);
+
+  overflow: hidden;
+}
+
+
+.caseWorkspaceHeader {
+  padding: 27px;
+
+  display: flex;
+
+  align-items:
+    flex-start;
+
+  justify-content:
+    space-between;
+
+  gap: 30px;
+
+  border-bottom:
+    1px solid var(--border);
+}
+
+
+.caseWorkspaceHeader h2 {
+  margin:
+    8px 0;
+
+  font-size: 30px;
+}
+
+
+.caseWorkspaceHeader p {
+  margin: 0;
+
+  color:
+    #718092;
+
+  font-size: 12px;
+}
+
+
+.caseWorkspaceHeader p strong {
+  color:
+    #dce2e9;
+}
+
+
+.caseWorkspaceBadges {
+  display: flex;
+
+  gap: 8px;
+}
+
+
+.caseWorkspaceGrid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(
+      0,
+      0.85fr
+    )
+    minmax(
+      0,
+      1.15fr
+    );
+}
+
+
+.caseEditor,
+.caseTimeline {
+  padding: 28px;
+}
+
+
+.caseEditor {
+  border-right:
+    1px solid var(--border);
+}
+
+
+.caseEditor h3,
+.caseTimeline h3 {
+  margin:
+    0 0 24px;
+
+  font-size: 20px;
+}
+
+
+.caseEditor label {
+  margin-bottom: 18px;
+
+  display: grid;
+
+  gap: 8px;
+
+  color:
+    #8491a1;
+
+  font-size: 12px;
+}
+
+
+.caseEditor textarea {
+  min-height: 130px;
+
+  resize: vertical;
+}
+
+
+.caseEditor select:disabled,
+.caseEditor input:disabled,
+.caseEditor textarea:disabled {
+  opacity: 0.55;
+
+  cursor:
+    not-allowed;
+}
+
+
+.readOnlyNotice {
+  margin-bottom: 22px;
+
+  padding: 13px;
+
+  border:
+    1px solid #405063;
+
+  border-radius: 8px;
+
+  background:
+    #10161d;
+
+  color:
+    #8c9bae;
+
+  font-size: 11px;
+
+  line-height: 1.5;
+}
+
+
+.caseMetadata {
+  display: grid;
+
+  gap: 1px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 8px;
+
+  overflow: hidden;
+}
+
+
+.caseMetadata > div {
+  padding: 13px;
+
+  display: grid;
+
+  gap: 5px;
+
+  background:
+    #0a0e13;
+}
+
+
+.caseMetadata span {
+  color:
+    #657284;
+
+  font-size: 10px;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    1px;
+}
+
+
+.caseMetadata strong {
+  color:
+    #ccd4de;
+
+  font-size: 11px;
+
+  overflow-wrap:
+    anywhere;
+}
+
+
+.timelineEntries {
+  margin-top: 25px;
+
+  display: grid;
+
+  gap: 0;
+}
+
+
+.timelineEntries article {
+  position: relative;
+
+  padding:
+    0 0 22px 24px;
+
+  border-left:
+    1px solid #29343f;
+}
+
+
+.timelineEntries article > span {
+  position: absolute;
+
+  top: 2px;
+  left: -5px;
+
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+
+  background:
+    var(--cyan);
+
+  box-shadow:
+    0 0 0 4px
+    var(--surface);
+}
+
+
+.timelineEntries p {
+  margin: 0;
+
+  color:
+    #8a96a5;
+
+  font-size: 11px;
+
+  line-height: 1.7;
+}
+
+
+.alertActions {
+  margin-top: 17px;
+}
+
+
+.alertActions a {
+  display:
+    inline-flex;
+
+  padding:
+    8px 11px;
+
+  border:
+    1px solid #2a3744;
+
+  border-radius: 7px;
+
+  color:
+    #9fcfff;
+
+  background:
+    #0c1218;
+
+  text-decoration:
+    none;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+
+.alertActions a:hover {
+  border-color:
+    #496a89;
+}
+
+
+@media (
+  max-width: 1000px
+) {
+  .caseWorkspaceGrid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .caseEditor {
+    border-right: 0;
+
+    border-bottom:
+      1px solid var(--border);
+  }
+
+  .caseFilterBar {
+    grid-template-columns:
+      1fr 1fr;
+  }
+}
+
+
+@media (
+  max-width: 700px
+) {
+  .caseCreateBanner,
+  .caseWorkspaceHeader {
+    flex-direction:
+      column;
+  }
+
+  .caseCreateButton {
+    width: 100%;
+  }
+
+  .caseFilterBar {
+    grid-template-columns:
+      1fr;
+  }
+
+  .caseWorkspaceBadges {
+    flex-wrap: wrap;
+  }
+}

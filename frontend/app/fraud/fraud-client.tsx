@@ -106,6 +106,16 @@ export default function FraudClient() {
   ] =
     useState("");
 
+  const canManageCases =
+  user?.permissions
+    .includes(
+      "*",
+    )
+  ||
+  user?.permissions
+    .includes(
+      "cases.manage",
+    );
 
   const handleAuthFailure =
     useCallback(
@@ -359,13 +369,16 @@ export default function FraudClient() {
                 Monitoring
             </Link>
 
-            <Link href="/fraud">
-                Fraud Alerts
+            <Link
+              href="/fraud"
+              className="active"
+            >
+              Fraud Alerts
             </Link>
 
-            <span>
+            <Link href="/cases">
               Investigations
-            </span>
+            </Link>
 
             <span>
               Security Events
@@ -822,6 +835,20 @@ export default function FraudClient() {
                         alert.created_at,
                       )}
                     </small>
+
+                    {canManageCases && (
+                      <div
+                        className="alertActions"
+                      >
+                        <Link
+                          href={
+                            `/cases?alertId=${alert.id}`
+                          }
+                        >
+                          Open investigation →
+                        </Link>
+                      </div>
+                    )}
                   </article>
                 ),
               )}

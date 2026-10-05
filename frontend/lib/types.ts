@@ -137,3 +137,59 @@ export type FraudAlertPage = {
 
   items: FraudAlert[];
 };
+
+export type CaseStatus =
+  | "open"
+  | "investigating"
+  | "pending_review"
+  | "closed";
+
+
+export type CasePriority =
+  | "low"
+  | "medium"
+  | "high"
+  | "critical";
+
+
+export type InvestigationCase = {
+  id: string;
+
+  case_ref: string;
+
+  alert_id: string;
+
+  transaction_id:
+    | string
+    | null;
+
+  transaction_ref:
+    | string
+    | null;
+
+  alert_severity: string;
+
+  status: CaseStatus;
+
+  priority: CasePriority;
+
+  assigned_to:
+    | string
+    | null;
+
+  notes:
+    | string
+    | null;
+
+  created_at: string;
+  updated_at: string;
+};
+
+
+export type InvestigationCasePage = {
+  total: number;
+  limit: number;
+  offset: number;
+
+  items: InvestigationCase[];
+};
