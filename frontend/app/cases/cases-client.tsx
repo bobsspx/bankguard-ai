@@ -209,6 +209,36 @@ export default function CasesClient() {
       [router],
     );
 
+  const selectCase = useCallback(
+    (
+      item: InvestigationCase | null,
+    ) => {
+      setSelectedCase(item);
+
+      if (!item) {
+        setEditStatus("");
+        setEditPriority("");
+        setEditAssignee("");
+        setNote("");
+        return;
+      }
+
+      setEditStatus(
+        item.status,
+      );
+
+      setEditPriority(
+        item.priority,
+      );
+
+      setEditAssignee(
+        item.assigned_to ?? "",
+      );
+
+      setNote("");
+    },
+    [],
+  );
 
   const loadCases =
     useCallback(
@@ -312,39 +342,14 @@ export default function CasesClient() {
           casesData,
         );
 
-        setSelectedCase(
-          (
-            current
-          ) => {
-            if (!current) {
-              return (
-                casesData
-                  .items[0]
-                ?? null
-              );
-            }
+        const nextSelectedCase =
+          casesData.items[0] ?? null;
 
-            return (
-              casesData
-                .items
-                .find(
-                  (
-                    item,
-                  ) =>
-                    item.id
-                    === current.id,
-                )
-              ??
-              casesData
-                .items[0]
-              ??
-              null
-            );
-          },
-        );
+        selectCase(nextSelectedCase);
       },
       [
         handleAuthFailure,
+        selectCase,
       ],
     );
 
@@ -377,27 +382,6 @@ export default function CasesClient() {
     },
     [loadCases],
   );
-
-  function selectCase(
-    item: InvestigationCase | null,
-    ) {
-    setSelectedCase(item);
-
-    if (!item) {
-        setEditStatus("");
-        setEditPriority("");
-        setEditAssignee("");
-        setNote("");
-        return;
-    }
-
-    setEditStatus(item.status);
-    setEditPriority(item.priority);
-    setEditAssignee(
-        item.assigned_to ?? "",
-    );
-    setNote("");
-    }
 
   async function applyFilters() {
     setLoading(true);
