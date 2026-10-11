@@ -78,3 +78,23 @@ def test_fraud_analyst_can_manage_cases():
         "fraud_analyst",
         "cases.manage",
     )
+
+def test_reviewer_can_review_decisions():
+    assert has_permission(
+        "reviewer",
+        "decisions.review",
+    )
+
+
+def test_fraud_analyst_can_read_decisions():
+    assert has_permission(
+        "fraud_analyst",
+        "decisions.read",
+    )
+
+
+def test_fraud_analyst_cannot_make_final_decision():
+    assert not has_permission(
+        "fraud_analyst",
+        "decisions.review",
+    )

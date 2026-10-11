@@ -11,6 +11,7 @@ ROLE_PERMISSIONS = {
         "alerts.manage",
         "cases.read",
         "cases.manage",
+        "decisions.read",
     },
 
     "security_analyst": {
@@ -26,6 +27,8 @@ ROLE_PERMISSIONS = {
         "fraud.read",
         "alerts.read",
         "cases.read",
+        "decisions.read",
+        "decisions.review",
     },
 }
 

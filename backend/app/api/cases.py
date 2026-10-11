@@ -407,6 +407,21 @@ def update_investigation_case(
             ),
         )
 
+    if (
+        payload.status == "closed"
+        and user.role != "admin"
+    ):
+        raise HTTPException(
+            status_code=(
+                status.HTTP_403_FORBIDDEN
+            ),
+            detail=(
+                "Cases must be finalized "
+                "through the reviewer "
+                "fraud decision workflow."
+            ),
+        )
+
     try:
         result = update_case(
             db,
