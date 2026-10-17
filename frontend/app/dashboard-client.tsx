@@ -373,9 +373,13 @@ export default function DashboardClient() {
               Fraud Alerts
             </a>
 
-            <span>
+            <Link href="/cases">
               Investigations
-            </span>
+            </Link>
+
+            <Link href="/decisions">
+              Decision Analytics
+            </Link>
 
             <span>
               Security Events
@@ -696,6 +700,11 @@ export default function DashboardClient() {
                                 transaction.transaction_type
                               }
                             </small>
+                            {user?.permissions.some(permission => permission === "*" || permission === "fraud.read") && (
+                              <Link href={`/transactions/${transaction.id}`} style={{ color: "var(--cyan)", display: "inline-block", marginTop: 8 }}>
+                                Inspect ML
+                              </Link>
+                            )}
                           </td>
 
                           <td>

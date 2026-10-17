@@ -1,0 +1,91 @@
+{
+  "model_version": "synthetic-logistic-v1",
+  "dataset_manifest_sha256": "f19212f199b8ac9161b8e9a529a104f5685308b8b29e37289af7f77a7f3ca712",
+  "runtime": {
+    "python": "3.12.14",
+    "sklearn": "1.8.0",
+    "numpy": "2.3.5"
+  },
+  "threshold": 0.21,
+  "threshold_policy": "validation F1 over 0.05..0.95 step 0.01, ties prefer higher",
+  "preprocessing": "Train-only DictVectorizer + StandardScaler; numeric null=0 plus missing indicator",
+  "limitation": "Synthetic benchmark only. Score is not calibrated real-world fraud probability.",
+  "confusion_matrix_order": "[[TN, FP], [FN, TP]]",
+  "splits": {
+    "validation": {
+      "rows": 450,
+      "model": {
+        "average_precision": 0.5889267146637338,
+        "roc_auc": 0.8561312456016891,
+        "precision": 0.4574468085106383,
+        "recall": 0.7413793103448276,
+        "f1": 0.5657894736842105,
+        "confusion_matrix": [
+          [
+            341,
+            51
+          ],
+          [
+            15,
+            43
+          ]
+        ]
+      },
+      "constant_baseline": {
+        "average_precision": 0.1288888888888889,
+        "roc_auc": 0.5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "confusion_matrix": [
+          [
+            392,
+            0
+          ],
+          [
+            58,
+            0
+          ]
+        ]
+      }
+    },
+    "test": {
+      "rows": 450,
+      "model": {
+        "average_precision": 0.5920726423435436,
+        "roc_auc": 0.8012937921359261,
+        "precision": 0.6029411764705882,
+        "recall": 0.6119402985074627,
+        "f1": 0.6074074074074074,
+        "confusion_matrix": [
+          [
+            356,
+            27
+          ],
+          [
+            26,
+            41
+          ]
+        ]
+      },
+      "constant_baseline": {
+        "average_precision": 0.14888888888888888,
+        "roc_auc": 0.5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "confusion_matrix": [
+          [
+            383,
+            0
+          ],
+          [
+            67,
+            0
+          ]
+        ]
+      }
+    }
+  },
+  "model_sha256": "133da27a9f60f7db2b8b118681813bbbac73831fe12cf28175dc0a57d41f09f2"
+}

@@ -10,6 +10,7 @@ import {
 
 import {
   useRouter,
+  useSearchParams,
 } from "next/navigation";
 
 import type {
@@ -19,6 +20,9 @@ import type {
   InvestigationCase,
   InvestigationCasePage,
 } from "@/lib/types";
+
+import FinalReviewPanel
+  from "./final-review-panel";
 
 
 function formatTime(
@@ -132,21 +136,13 @@ export default function CasesClient() {
     setPriorityFilter,
   ] =
     useState("");
+  const searchParams = useSearchParams();
+  const alertIdFromUrl = searchParams.get("alertId") ?? "";
 
-  const [
-    pendingAlertId,
-    setPendingAlertId,
-    ] = useState(() => {
-    if (typeof window === "undefined") {
-        return "";
-    }
-
-    return (
-        new URLSearchParams(
-        window.location.search
-        ).get("alertId") ?? ""
-    );
-});
+  const [pendingAlertId, setPendingAlertId] = useState("");
+  useEffect(() => {
+    setPendingAlertId(alertIdFromUrl);
+  }, [alertIdFromUrl]);
 
   const [
     editStatus,
@@ -714,6 +710,67 @@ export default function CasesClient() {
     }
   }
 
+  async function
+  handleDecisionCompleted(
+    caseId: string,
+  ) {
+    setLoading(true);
+
+    try {
+      await loadCases(
+        statusFilter,
+        priorityFilter,
+      );
+
+      const response =
+        await fetch(
+          `/api/cases/${
+            encodeURIComponent(
+              caseId,
+            )
+          }`,
+          {
+            cache:
+              "no-store",
+          },
+        );
+
+      if (
+        handleAuthFailure(
+          response.status,
+        )
+      ) {
+        return;
+      }
+
+      if (response.ok) {
+        const updated =
+          await response.json();
+
+        selectCase(
+          updated as
+          InvestigationCase,
+        );
+      }
+
+      setNotice(
+        "Final decision recorded. Investigation case closed.",
+      );
+
+    } catch (
+      currentError
+    ) {
+      setError(
+        currentError
+          instanceof Error
+          ? currentError.message
+          : "Unable to refresh case after final review.",
+      );
+
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function logout() {
     await fetch(
@@ -1086,13 +1143,15 @@ export default function CasesClient() {
                 Investigating
               </option>
 
-              <option value="pending_review">
-                Pending review
-              </option>
+             <option value="pending_review">
+              Pending review
+            </option>
 
+            {selectedCase?.status === "closed" && (
               <option value="closed">
                 Closed
               </option>
+            )}
             </select>
 
             <select
@@ -1613,6 +1672,19 @@ export default function CasesClient() {
                 </div>
               </div>
             </div>
+
+            <FinalReviewPanel
+            caseItem={
+              selectedCase
+            }
+            user={
+              user
+            }
+            onCompleted={
+              handleDecisionCompleted
+            }
+          />
+
           </section>
         )}
       </section>

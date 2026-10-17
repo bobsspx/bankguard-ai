@@ -29,3 +29,19 @@ frontend/out/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local environment files
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Local handoff packages
+/bankguard-*.zip
+/bangkuard-*.zip
+/INSTALL.ps1
+/patch-manifest.json
+/bankguard-ml-backup-*/
+
+# Generated training datasets and experiment outputs
+/backend/artifacts/

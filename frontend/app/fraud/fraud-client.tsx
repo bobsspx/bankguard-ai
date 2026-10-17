@@ -840,11 +840,7 @@ export default function FraudClient() {
                       <div
                         className="alertActions"
                       >
-                        <Link
-                          href={
-                            `/cases?alertId=${alert.id}`
-                          }
-                        >
+                        <Link href={`/cases?alertId=${alert.id}`}>
                           Open investigation →
                         </Link>
                       </div>

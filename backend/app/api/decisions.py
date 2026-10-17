@@ -4,6 +4,7 @@ from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
+    Query,
     Request,
     status,
 )
@@ -18,7 +19,10 @@ from app.models.staff_user import (
 )
 from app.schemas.decision import (
     FraudDecisionCreateRequest,
+    FraudDecisionPage,
     FraudDecisionResponse,
+    FraudDecisionSummaryResponse,
+    FraudDecisionValue,
 )
 from app.services.audit import (
     write_audit_log,
@@ -32,6 +36,10 @@ from app.services.fraud_decision import (
     FraudDecisionNotFoundError,
     create_fraud_decision,
     get_fraud_decision_by_case,
+)
+from app.services.decision_analytics import (
+    get_decision_history,
+    get_decision_summary,
 )
 
 
@@ -82,6 +90,100 @@ def build_decision_response(
         ),
     )
 
+@router.get(
+    "/summary",
+    response_model=(
+        FraudDecisionSummaryResponse
+    ),
+)
+def read_decision_summary(
+    db: Session = Depends(
+        get_db
+    ),
+
+    _user: StaffUser = Depends(
+        require_permission(
+            "decisions.read"
+        )
+    ),
+):
+    return get_decision_summary(
+        db
+    )
+
+@router.get(
+    "/history",
+    response_model=(
+        FraudDecisionPage
+    ),
+)
+def read_decision_history(
+    decision: (
+        FraudDecisionValue
+        | None
+    ) = None,
+
+    reviewed_by: (
+        str
+        | None
+    ) = None,
+
+    limit: int = Query(
+        default=50,
+        ge=1,
+        le=100,
+    ),
+
+    offset: int = Query(
+        default=0,
+        ge=0,
+    ),
+
+    db: Session = Depends(
+        get_db
+    ),
+
+    _user: StaffUser = Depends(
+        require_permission(
+            "decisions.read"
+        )
+    ),
+):
+    total, rows = (
+        get_decision_history(
+            db,
+
+            limit=limit,
+            offset=offset,
+
+            decision=decision,
+
+            reviewed_by=(
+                reviewed_by
+            ),
+        )
+    )
+
+    items = [
+        build_decision_response(
+            fraud_decision,
+            case_ref,
+            transaction_ref,
+        )
+        for (
+            fraud_decision,
+            case_ref,
+            transaction_ref,
+        )
+        in rows
+    ]
+
+    return FraudDecisionPage(
+        total=total,
+        limit=limit,
+        offset=offset,
+        items=items,
+    )
 
 @router.get(
     "/{case_id}",

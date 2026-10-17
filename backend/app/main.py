@@ -1,3 +1,4 @@
+from app.api.ml import router as ml_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.health import router as health_router
@@ -36,6 +37,7 @@ app.include_router(transactions_router)
 app.include_router(fraud_router)
 app.include_router(cases_router)
 app.include_router(decisions_router)
+app.include_router(ml_router)
 
 @app.get("/")
 def root():

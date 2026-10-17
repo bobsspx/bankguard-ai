@@ -1,8 +1,10 @@
 import CasesClient from "./cases-client";
-
+import { Suspense } from "react";
 
 export default function CasesPage() {
   return (
-    <CasesClient />
+    <Suspense fallback={<p>Loading investigations...</p>}>
+      <CasesClient />
+    </Suspense>
   );
 }

@@ -54,3 +54,32 @@ class FraudDecisionResponse(
 
     reviewed_at: datetime
     created_at: datetime
+
+class FraudDecisionSummaryResponse(
+    BaseModel
+):
+    total_reviewed: int
+
+    confirmed_fraud: int
+
+    false_positive: int
+
+    inconclusive: int
+
+    confirmation_rate: float
+
+    reviewer_count: int
+
+
+class FraudDecisionPage(
+    BaseModel
+):
+    total: int
+
+    limit: int
+
+    offset: int
+
+    items: list[
+        FraudDecisionResponse
+    ]

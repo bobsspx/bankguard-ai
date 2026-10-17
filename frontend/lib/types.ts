@@ -193,3 +193,57 @@ export type InvestigationCasePage = {
 
   items: InvestigationCase[];
 };
+
+export type FraudDecisionValue =
+  | "confirmed_fraud"
+  | "false_positive"
+  | "inconclusive";
+
+
+export type FraudDecision = {
+  id: string;
+
+  case_id: string;
+
+  case_ref?:
+    | string
+    | null;
+
+  transaction_id:
+    | string
+    | null;
+
+  transaction_ref?:
+    | string
+    | null;
+
+  alert_id: string;
+
+  decision:
+    FraudDecisionValue;
+
+  decision_reason: string;
+
+  reviewed_by: string;
+
+  reviewed_at: string;
+
+  created_at: string;
+};
+
+export type FraudDecisionPage = {
+  items: FraudDecision[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+
+export type FraudDecisionSummary = {
+  total_reviewed: number;
+  confirmed_fraud: number;
+  false_positive: number;
+  inconclusive: number;
+  confirmation_rate: number;
+  reviewer_count: number;
+};
