@@ -9,6 +9,7 @@ from app.api.transactions import (router as transactions_router,)
 from app.api.fraud import (router as fraud_router,)
 from app.api.cases import (router as cases_router,)
 from app.api.decisions import (router as decisions_router,)
+from app.core.config import settings
 
 app = FastAPI(
     title="BankGuard AI API",
@@ -23,7 +24,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
+        settings.frontend_origin,
     ],
     allow_credentials=True,
     allow_methods=["*"],
