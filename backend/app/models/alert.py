@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
-
+from sqlalchemy import Index, text
 
 class Alert(Base):
     __tablename__ = "alerts"
@@ -69,4 +69,17 @@ class Alert(Base):
 
     resolved_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
+    )
+ 
+    __table_args__ = (
+        Index(
+            "uq_alerts_failed_login_event",
+            "alert_type",
+            "login_event_id",
+            unique=True,
+            postgresql_where=text(
+                "alert_type = 'FAILED_LOGIN_BURST' "
+                "AND login_event_id IS NOT NULL"
+            ),
+        ),
     )

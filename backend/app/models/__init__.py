@@ -8,6 +8,7 @@ from app.models.login_event import LoginEvent
 from app.models.transaction import Transaction
 from app.models.staff_user import StaffUser
 from app.models.fraud_decision import FraudDecision
+from app.models.security_alert_evidence import SecurityAlertEvidence
 
 __all__ = [
     "Account",
