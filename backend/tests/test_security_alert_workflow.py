@@ -53,7 +53,7 @@ def test_new_alert_stages_evidence(monkeypatch):
     )
 
     assert result.created is True
-    
+
     from app.models.security_alert_evidence import (
         SecurityAlertEvidence,
     )

@@ -54,7 +54,7 @@ def load_failed_login_detection(
         if target.success:
             return None
 
-        
+
         statement = (
             select(
                 LoginEvent.id,
@@ -80,7 +80,7 @@ def load_failed_login_detection(
         rows = db.execute(statement).mappings().all()
 
 
-        
+
         history = [
             LoginAttempt(
                 event_id=str(item["id"]),

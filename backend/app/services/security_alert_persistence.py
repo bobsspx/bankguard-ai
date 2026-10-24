@@ -35,8 +35,8 @@ def create_security_alert(
     if preview.severity != "high":
         raise ValueError("Unexpected severity")
 
-    
-    
+
+
     # Validate triggering event
     if not isinstance(preview.login_event_id, UUID):
         raise TypeError("login_event_id must be UUID")

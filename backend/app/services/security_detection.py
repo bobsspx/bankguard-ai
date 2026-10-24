@@ -62,7 +62,7 @@ def detect_failed_login_burst(
         if event.event_id == current.event_id:
             continue
 
-        
+
         if event.event_id in matching:
             existing = matching[event.event_id]
 

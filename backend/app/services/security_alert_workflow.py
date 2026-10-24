@@ -44,7 +44,7 @@ def persist_security_alert_with_evidence(
 
     result = create_security_alert(db, preview)
 
-    
+
     if result.created:
         db.add(
             SecurityAlertEvidence(

@@ -48,7 +48,7 @@ def build_security_alert_preview(
     }:
         raise ValueError(
             "Triggering event is missing from evidence"
-    )   
+    )
 
     return SecurityAlertPreview(
         alert_type=detection.rule_code,
