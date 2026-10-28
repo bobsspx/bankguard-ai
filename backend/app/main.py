@@ -10,6 +10,7 @@ from app.api.fraud import (router as fraud_router,)
 from app.api.cases import (router as cases_router,)
 from app.api.decisions import (router as decisions_router,)
 from app.core.config import settings
+from app.api.security import router as security_router
 
 app = FastAPI(
     title="BankGuard AI API",
@@ -39,6 +40,7 @@ app.include_router(fraud_router)
 app.include_router(cases_router)
 app.include_router(decisions_router)
 app.include_router(ml_router)
+app.include_router(security_router)
 
 @app.get("/")
 def root():
