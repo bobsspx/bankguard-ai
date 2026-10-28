@@ -380,9 +380,9 @@ export default function FraudClient() {
               Investigations
             </Link>
 
-            <span>
-              Security Events
-            </span>
+            <Link href="/security">
+              Security Operations
+            </Link>
           </nav>
         </div>
 

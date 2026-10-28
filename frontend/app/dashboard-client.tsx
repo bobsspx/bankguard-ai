@@ -381,9 +381,9 @@ export default function DashboardClient() {
               Decision Analytics
             </Link>
 
-            <span>
-              Security Events
-            </span>
+            <Link href="/security">
+              Security Operations
+            </Link>
           </nav>
         </div>
 
