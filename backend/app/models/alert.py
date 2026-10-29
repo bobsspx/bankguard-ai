@@ -82,4 +82,15 @@ class Alert(Base):
                 "AND login_event_id IS NOT NULL"
             ),
         ),
+
+        Index(
+            "uq_alerts_new_device_login_event",
+            "alert_type",
+            "login_event_id",
+            unique=True,
+            postgresql_where=text(
+                "alert_type = 'NEW_DEVICE_LOGIN' "
+                "AND login_event_id IS NOT NULL"
+            ),
+        ),
     )
