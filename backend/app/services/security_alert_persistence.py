@@ -29,10 +29,24 @@ def create_security_alert(
 ) -> AlertPersistenceResult:
     """Insert or reuse an alert. Caller controls transaction."""
 
-    if preview.alert_type != RULE:
+    if preview.alert_type not in {RULE, "NEW_DEVICE_LOGIN"}:
         raise ValueError("Unsupported alert type")
 
-    if preview.severity != "high":
+    if preview.alert_type == "NEW_DEVICE_LOGIN":
+        from app.services.new_device_workflow import verified_new_device_preview
+
+        try:
+            account_id = UUID(preview.account_id)
+        except (ValueError, TypeError, AttributeError) as exc:
+            raise ValueError("Invalid new-device account") from exc
+        expected = verified_new_device_preview(
+            db, account_id=account_id, current_event_id=preview.login_event_id,
+        )
+        if preview != expected:
+            raise ValueError("New-device preview differs from persisted detection")
+
+    expected_severity = "medium" if preview.alert_type == "NEW_DEVICE_LOGIN" else "high"
+    if preview.severity != expected_severity:
         raise ValueError("Unexpected severity")
 
 
@@ -89,7 +103,7 @@ def create_security_alert(
     statement = (
         insert(Alert)
         .values(
-            alert_type=RULE,
+            alert_type=preview.alert_type,
             login_event_id=preview.login_event_id,
             transaction_id=None,
             severity=preview.severity,
@@ -103,7 +117,7 @@ def create_security_alert(
                 Alert.login_event_id,
             ],
             index_where=(
-                (Alert.alert_type == RULE)
+                (Alert.alert_type == preview.alert_type)
                 & Alert.login_event_id.is_not(None)
             ),
         )
@@ -120,7 +134,7 @@ def create_security_alert(
 
     existing_id = db.scalar(
         select(Alert.id).where(
-            Alert.alert_type == RULE,
+            Alert.alert_type == preview.alert_type,
             Alert.login_event_id == preview.login_event_id,
         )
     )

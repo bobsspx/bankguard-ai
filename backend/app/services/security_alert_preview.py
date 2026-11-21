@@ -7,6 +7,7 @@ from app.services.security_detection import SecurityDetection
 
 SUPPORTED_RULES = frozenset({
     "FAILED_LOGIN_BURST",
+    "NEW_DEVICE_LOGIN",
 })
 
 

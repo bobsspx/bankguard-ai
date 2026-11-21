@@ -99,6 +99,13 @@ def list_transactions(
         count_statement
     ) or 0
 
+    sort_column = {
+        "occurred_at": Transaction.occurred_at,
+        "amount": Transaction.amount,
+        "transaction_ref": Transaction.transaction_ref,
+    }[filters.sort_by]
+    sort_order = sort_column.asc() if filters.sort_dir == "asc" else sort_column.desc()
+
     statement = (
         select(
             Transaction,
@@ -117,7 +124,8 @@ def list_transactions(
         )
         .where(*conditions)
         .order_by(
-            Transaction.occurred_at.desc()
+            sort_order,
+            Transaction.id.asc(),
         )
         .offset(filters.offset)
         .limit(filters.limit)

@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import AppSidebar from "@/app/components/app-sidebar";
+
 
 import {
   useCallback,
@@ -12,6 +13,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
+import { revokeAndLogout } from "@/lib/logout-client";
 
 import type {
   CasePriority,
@@ -23,6 +25,7 @@ import type {
 
 import FinalReviewPanel
   from "./final-review-panel";
+import CaseContextPanel from "./case-context-panel";
 
 
 function formatTime(
@@ -136,13 +139,19 @@ export default function CasesClient() {
     setPriorityFilter,
   ] =
     useState("");
-  const searchParams = useSearchParams();
-  const alertIdFromUrl = searchParams.get("alertId") ?? "";
 
-  const [pendingAlertId, setPendingAlertId] = useState("");
-  useEffect(() => {
-    setPendingAlertId(alertIdFromUrl);
-  }, [alertIdFromUrl]);
+  const searchParams = useSearchParams();
+
+  const alertIdFromUrl = searchParams.get("alertId") ?? "";
+  const caseIdFromUrl = searchParams.get("caseId") ?? "";
+
+  const [completedAlertId, setCompletedAlertId] = useState("");
+
+  const pendingAlertId =
+    alertIdFromUrl && completedAlertId !== alertIdFromUrl
+      ? alertIdFromUrl
+      : "";
+
 
   const [
     editStatus,
@@ -338,14 +347,26 @@ export default function CasesClient() {
           casesData,
         );
 
-        const nextSelectedCase =
-          casesData.items[0] ?? null;
+        let nextSelectedCase = casesData.items[0] ?? null;
+
+        if (caseIdFromUrl) {
+          const detailResponse = await fetch(
+            `/api/cases/${encodeURIComponent(caseIdFromUrl)}`,
+            { cache: "no-store" },
+          );
+          if (handleAuthFailure(detailResponse.status)) return;
+          if (!detailResponse.ok) {
+            throw new Error("Unable to load the linked investigation case.");
+          }
+          nextSelectedCase = await detailResponse.json();
+        }
 
         selectCase(nextSelectedCase);
       },
       [
         handleAuthFailure,
         selectCase,
+        caseIdFromUrl,
       ],
     );
 
@@ -504,7 +525,7 @@ export default function CasesClient() {
         `${created.case_ref} created successfully.`,
       );
 
-      setPendingAlertId("");
+      setCompletedAlertId(alertIdFromUrl);
 
       router.replace(
         "/cases",
@@ -548,6 +569,9 @@ export default function CasesClient() {
         string
       > = {};
 
+    payload.expected_status = selectedCase.status;
+    payload.expected_updated_at = selectedCase.updated_at;
+
     if (
       editStatus
       &&
@@ -590,7 +614,7 @@ export default function CasesClient() {
     if (
       Object.keys(
         payload,
-      ).length === 0
+      ).length === 2
     ) {
       setNotice(
         "No case changes to save.",
@@ -773,19 +797,7 @@ export default function CasesClient() {
   }
 
   async function logout() {
-    await fetch(
-      "/api/auth/logout",
-      {
-        method:
-          "POST",
-      },
-    );
-
-    router.replace(
-      "/login",
-    );
-
-    router.refresh();
+    await revokeAndLogout(router, setError);
   }
 
 
@@ -841,59 +853,7 @@ export default function CasesClient() {
     <main
       className="dashboard"
     >
-      <aside
-        className="sidebar"
-      >
-        <div>
-          <div
-            className="logoRow"
-          >
-            <div
-              className="brandMark"
-            >
-              BG
-            </div>
-
-            <div>
-              <strong>
-                BANKGUARD
-              </strong>
-
-              <span>
-                AI
-              </span>
-            </div>
-          </div>
-
-          <nav>
-            <Link href="/">
-              Transaction Monitoring
-            </Link>
-
-            <Link href="/fraud">
-              Fraud Alerts
-            </Link>
-
-            <Link
-              href="/cases"
-              className="active"
-            >
-              Investigations
-            </Link>
-
-            <span>
-              Security Events
-            </span>
-          </nav>
-        </div>
-
-        <button
-          className="signOut"
-          onClick={logout}
-        >
-          Sign out
-        </button>
-      </aside>
+      <AppSidebar user={user} onLogout={logout} />
 
 
       <section
@@ -1464,9 +1424,9 @@ export default function CasesClient() {
                       Pending review
                     </option>
 
-                    <option value="closed">
-                      Closed
-                    </option>
+                    {selectedCase.status === "closed" && (
+                      <option value="closed">Closed</option>
+                    )}
                   </select>
                 </label>
 
@@ -1672,6 +1632,8 @@ export default function CasesClient() {
                 </div>
               </div>
             </div>
+
+            <CaseContextPanel key={`${selectedCase.id}:${selectedCase.updated_at}`} caseId={selectedCase.id} />
 
             <FinalReviewPanel
             caseItem={

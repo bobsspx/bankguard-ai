@@ -1,5 +1,7 @@
 "use client";
 
+import AppSidebar from "@/app/components/app-sidebar";
+
 import Link
   from "next/link";
 
@@ -12,6 +14,7 @@ import {
 import {
   useRouter,
 } from "next/navigation";
+import { revokeAndLogout } from "@/lib/logout-client";
 
 import type {
   CurrentUser,
@@ -379,19 +382,7 @@ DecisionsClient() {
 
 
   async function logout() {
-    await fetch(
-      "/api/auth/logout",
-      {
-        method:
-          "POST",
-      },
-    );
-
-    router.replace(
-      "/login",
-    );
-
-    router.refresh();
+    await revokeAndLogout(router, setError);
   }
 
 
@@ -415,65 +406,7 @@ DecisionsClient() {
     <main
       className="dashboard"
     >
-      <aside
-        className="sidebar"
-      >
-        <div>
-          <div
-            className="logoRow"
-          >
-            <div
-              className="brandMark"
-            >
-              BG
-            </div>
-
-            <div>
-              <strong>
-                BANKGUARD
-              </strong>
-
-              <span>
-                AI
-              </span>
-            </div>
-          </div>
-
-
-          <nav>
-            <Link href="/">
-              Transaction Monitoring
-            </Link>
-
-            <Link href="/fraud">
-              Fraud Alerts
-            </Link>
-
-            <Link href="/cases">
-              Investigations
-            </Link>
-
-            <Link
-              href="/decisions"
-              className="active"
-            >
-              Decision Analytics
-            </Link>
-
-            <span>
-              Security Events
-            </span>
-          </nav>
-        </div>
-
-
-        <button
-          className="signOut"
-          onClick={logout}
-        >
-          Sign out
-        </button>
-      </aside>
+      <AppSidebar user={user} onLogout={logout} />
 
 
       <section
@@ -830,7 +763,7 @@ DecisionsClient() {
                             <Link
                               className="decisionCaseLink"
                               href={
-                                `/cases/${item.case_id}`
+                                `/cases?caseId=${encodeURIComponent(item.case_id)}`
                               }
                             >
                               {

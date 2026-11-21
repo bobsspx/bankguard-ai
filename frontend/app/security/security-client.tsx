@@ -1,9 +1,12 @@
 
 "use client";
 
-import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import AppSidebar from "@/app/components/app-sidebar";
+
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { revokeAndLogout } from "@/lib/logout-client";
+import SecurityInvestigation from "./security-investigation";
 
 type CurrentUser = {
   id: string;
@@ -63,16 +66,23 @@ export default function SecurityClient() {
   const [error, setError] = useState("");
   const [evidence, setEvidence] = useState<EvidenceDetail | null>(null);
   const [evidenceLoading, setEvidenceLoading] = useState(false);
+  const [investigationId, setInvestigationId] = useState<string | null>(null);
+  const loadSequence = useRef(0);
+  const evidenceSequence = useRef(0);
+  const canManage = user?.permissions.includes("*") || user?.permissions.includes("alerts.manage");
 
   const canReadEvidence =
     user?.permissions.includes("*") ||
     user?.permissions.includes("audit.read");
 
   const load = useCallback(async () => {
+    const sequence = ++loadSequence.current;
+    setLoading(true);
     try {
       const meResponse = await fetch("/api/auth/me", {
         cache: "no-store",
       });
+      if (sequence !== loadSequence.current) return;
 
       setError("");
 
@@ -86,6 +96,7 @@ export default function SecurityClient() {
       }
 
       const currentUser: CurrentUser = await meResponse.json();
+      if (sequence !== loadSequence.current) return;
       setUser(currentUser);
 
       const allowed =
@@ -109,6 +120,7 @@ export default function SecurityClient() {
         fetch("/api/security/summary", { cache: "no-store" }),
         fetch(`/api/security/alerts?${params}`, { cache: "no-store" }),
       ]);
+      if (sequence !== loadSequence.current) return;
 
       if (
         summaryResponse.status === 401 ||
@@ -129,14 +141,22 @@ export default function SecurityClient() {
         throw new Error("Unable to load security monitoring data.");
       }
 
-      setSummary(await summaryResponse.json());
-      setAlerts(await alertsResponse.json());
+      const [summaryData, alertData] = await Promise.all([summaryResponse.json(), alertsResponse.json()]);
+      if (sequence !== loadSequence.current) return;
+      setSummary(summaryData);
+      setAlerts(alertData);
     } catch (err) {
+      if (sequence !== loadSequence.current) return;
+      setSummary(null);
+      setAlerts(null);
+      evidenceSequence.current += 1;
+      setEvidence(null);
+      setInvestigationId(null);
       setError(
         err instanceof Error ? err.message : "Security dashboard error."
       );
     } finally {
-      setLoading(false);
+      if (sequence === loadSequence.current) setLoading(false);
     }
   }, [router, page, status]);
 
@@ -150,6 +170,7 @@ export default function SecurityClient() {
 
   async function openEvidence(alertId: string) {
     if (!canReadEvidence) return;
+    const sequence = ++evidenceSequence.current;
 
     setEvidence(null);
     setEvidenceLoading(true);
@@ -160,6 +181,7 @@ export default function SecurityClient() {
         `/api/security/alerts/${alertId}/evidence`,
         { cache: "no-store" }
       );
+      if (sequence !== evidenceSequence.current) return;
 
       if (response.status === 401) {
         router.replace("/login");
@@ -174,20 +196,20 @@ export default function SecurityClient() {
         throw new Error("Evidence unavailable.");
       }
 
-      setEvidence(await response.json());
+      const data = await response.json();
+      if (sequence === evidenceSequence.current) setEvidence(data);
     } catch (err) {
+      if (sequence !== evidenceSequence.current) return;
       setError(
         err instanceof Error ? err.message : "Evidence request failed."
       );
     } finally {
-      setEvidenceLoading(false);
+      if (sequence === evidenceSequence.current) setEvidenceLoading(false);
     }
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.replace("/login");
-    router.refresh();
+    await revokeAndLogout(router, setError);
   }
 
   const totalPages = Math.max(
@@ -196,32 +218,8 @@ export default function SecurityClient() {
   );
 
   return (
-    <main className="dashboard">
-      <aside className="sidebar">
-        <div>
-          <div className="logoRow">
-            <div className="brandMark">BG</div>
-            <div>
-              <strong>BANKGUARD</strong>
-              <span> AI</span>
-            </div>
-          </div>
-
-          <nav aria-label="Main navigation">
-            <Link href="/">Transactions</Link>
-            <Link href="/fraud">Fraud Monitoring</Link>
-            <Link href="/cases">Investigations</Link>
-            <Link href="/decisions">Decisions</Link>
-            <Link href="/security" className="active">
-              Security Operations
-            </Link>
-          </nav>
-        </div>
-
-        <button className="signOut" onClick={logout}>
-          Sign out
-        </button>
-      </aside>
+    <main className="dashboard securityDashboard">
+      <AppSidebar user={user} onLogout={logout} />
 
       <section className="dashboardContent">
         <header className="dashboardHeader">
@@ -296,9 +294,12 @@ export default function SecurityClient() {
                   aria-label="Alert status"
                   className="bg-[#11161d] border border-[#26303b] rounded-lg p-3"
                   value={status}
+                  disabled={loading}
                   onChange={(event) => {
                     setStatus(event.target.value);
                     setPage(0);
+                    evidenceSequence.current += 1;
+                    setEvidenceLoading(false);
                     setEvidence(null);
                   }}
                 >
@@ -344,6 +345,9 @@ export default function SecurityClient() {
                             View evidence
                           </button>
                         )}
+                        <button className="text-[#62b9ff] underline ml-4" onClick={() => setInvestigationId(alert.id)}>
+                          Investigate
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -382,6 +386,16 @@ export default function SecurityClient() {
             </div>
           </section>
         )}
+
+        {investigationId && <SecurityInvestigation
+          key={investigationId}
+          alertId={investigationId}
+          canManage={Boolean(canManage)}
+          canReadAudit={Boolean(canReadEvidence)}
+          onClose={() => setInvestigationId(null)}
+          onChanged={() => { void load(); }}
+          onEvidence={() => { void openEvidence(investigationId); }}
+        />}
 
         {evidenceLoading && <p role="status">Loading evidence...</p>}
 

@@ -6,6 +6,7 @@ from uuid import UUID
 
 SUPPORTED_SECURITY_RULES = frozenset({
     "FAILED_LOGIN_BURST",
+    "NEW_DEVICE_LOGIN",
 })
 
 

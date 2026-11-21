@@ -90,3 +90,13 @@ def test_invalid_filter_range():
             min_amount=Decimal("500"),
             max_amount=Decimal("100"),
         )
+
+
+def test_sort_filters_allow_only_supported_fields_and_directions():
+    defaults = TransactionFilters()
+    assert (defaults.sort_by, defaults.sort_dir) == ("occurred_at", "desc")
+    assert TransactionFilters(sort_by="amount", sort_dir="asc").sort_by == "amount"
+    assert TransactionFilters(sort_by="transaction_ref", sort_dir="desc").sort_dir == "desc"
+    for payload in ({"sort_by": "password_hash"}, {"sort_dir": "sideways"}):
+        with pytest.raises(ValidationError):
+            TransactionFilters(**payload)

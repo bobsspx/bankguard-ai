@@ -3,6 +3,7 @@ import argparse
 from collections import Counter
 from datetime import datetime
 import hashlib
+import inspect
 import json
 from pathlib import Path
 import platform
@@ -11,17 +12,24 @@ import tempfile
 import warnings
 
 from app.ml.baseline import MODEL_VERSION, vector_record, predict
+from app.ml.build_dataset import GENERATOR_VERSION
 from app.services.ml_features import FEATURE_NAMES, FEATURE_VERSION
+from app.services import ml_features
 
 
 def read_dataset(directory):
     directory = Path(directory)
     manifest_bytes = (directory / 'manifest.json').read_bytes()
     manifest = json.loads(manifest_bytes)
-    if (manifest.get('feature_version') != FEATURE_VERSION or
+    if (manifest.get('dataset_version') != GENERATOR_VERSION or
+        manifest.get('feature_version') != FEATURE_VERSION or
         manifest.get('feature_names') != list(FEATURE_NAMES) or
         manifest.get('label_source') != 'synthetic_latent_scenario'):
         raise ValueError('Unsupported dataset contract')
+    if manifest.get('feature_source_sha256') != hashlib.sha256(
+        Path(inspect.getfile(ml_features)).read_bytes()
+    ).hexdigest():
+        raise ValueError('Dataset feature source differs from current extractor')
     result, seen, previous = {}, set(), None
     for split in ('train', 'validation', 'test'):
         raw = (directory / (split + '.jsonl')).read_bytes()
@@ -49,7 +57,7 @@ def read_dataset(directory):
         if {str(k): v for k, v in counts.items()} != details['label_counts']:
             raise ValueError('Dataset label count mismatch')
         result[split] = rows
-    return result, hashlib.sha256(manifest_bytes).hexdigest()
+    return result, hashlib.sha256(manifest_bytes).hexdigest(), manifest
 
 
 def metrics(y, probabilities, threshold):
@@ -74,7 +82,7 @@ def train(dataset, output):
     output = Path(output)
     if output.exists():
         raise FileExistsError('Choose a new output directory')
-    rows, manifest_hash = read_dataset(dataset)
+    rows, manifest_hash, dataset_manifest = read_dataset(dataset)
     vectorizer = DictVectorizer(sparse=True)
     scaler = StandardScaler(with_mean=False)
     records = {s: [vector_record(r['features']) for r in items] for s, items in rows.items()}
@@ -95,6 +103,8 @@ def train(dataset, output):
                                   (estimator.coef_[0] / scaler.scale_).tolist())),
                  dataset_manifest_sha256=manifest_hash)
     report = dict(model_version=MODEL_VERSION, dataset_manifest_sha256=manifest_hash,
+                  dataset_generation={key: dataset_manifest[key]
+                                      for key in ('dataset_version', 'seed', 'count', 'accounts', 'feature_source_sha256')},
                   runtime=dict(python=platform.python_version(), sklearn=sklearn.__version__, numpy=np.__version__),
                   threshold=threshold, threshold_policy='validation F1 over 0.05..0.95 step 0.01, ties prefer higher',
                   preprocessing='Train-only DictVectorizer + StandardScaler; numeric null=0 plus missing indicator',

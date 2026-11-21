@@ -34,9 +34,13 @@ def test_extra_metadata_cannot_enter_model():
         vector_record(features)
 
 
-def test_incompatible_model_rejected(tmp_path):
+@pytest.mark.parametrize('field,value', [
+    ('feature_version', 'wrong'),
+    ('model_version', 'synthetic-logistic-v1'),
+])
+def test_incompatible_model_rejected(tmp_path, field, value):
     model = load_model()
-    model['feature_version'] = 'wrong'
+    model[field] = value
     path = tmp_path / 'bad.json'
     path.write_text(json.dumps(model))
     with pytest.raises(ValueError):
@@ -51,12 +55,37 @@ def test_dataset_tampering_rejected(tmp_path):
         read_dataset(tmp_path / 'data')
 
 
+def test_dataset_rejects_stale_feature_source(tmp_path):
+    dataset = tmp_path / 'data'
+    export_dataset(dataset, count=100)
+    manifest_path = dataset / 'manifest.json'
+    manifest = json.loads(manifest_path.read_text())
+    manifest['feature_source_sha256'] = '0' * 64
+    manifest_path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match='feature source'):
+        read_dataset(dataset)
+
+
+def test_dataset_rejects_unknown_generator_version(tmp_path):
+    dataset = tmp_path / 'data'
+    export_dataset(dataset, count=100)
+    manifest_path = dataset / 'manifest.json'
+    manifest = json.loads(manifest_path.read_text())
+    manifest['dataset_version'] = 'unknown'
+    manifest_path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match='dataset contract'):
+        read_dataset(dataset)
+
+
 def test_training_export_parity_and_model_independent_of_test_labels(tmp_path):
     import hashlib
     from collections import Counter
     dataset = tmp_path / 'data'
     export_dataset(dataset, count=1000)
     first = train(dataset, tmp_path / 'run1')
+    assert first['model_version'] == 'synthetic-logistic-v2'
+    assert first['dataset_generation']['seed'] == 42
+    assert first['dataset_generation']['count'] == 1000
     # Alter only held-out test labels with valid metadata: fitted model/threshold must not change.
     path = dataset / 'test.jsonl'
     rows = [json.loads(line) for line in path.read_text().splitlines()]

@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Literal
 
 from pydantic import (
+    AwareDatetime,
     BaseModel,
     Field,
 )
@@ -51,6 +52,9 @@ class CaseCreateRequest(
 class CaseUpdateRequest(
     BaseModel
 ):
+    expected_status: CaseStatus
+    expected_updated_at: AwareDatetime
+
     status: (
         CaseStatus | None
     ) = None
@@ -140,3 +144,26 @@ class CasePage(
     items: list[
         CaseResponse
     ]
+
+
+class CaseEvidenceResponse(BaseModel):
+    rule_code: str
+    triggering_event_id: uuid.UUID
+    evidence_event_ids: list[uuid.UUID]
+    event_count: int = Field(ge=1)
+
+
+class CaseAuditItem(BaseModel):
+    id: uuid.UUID
+    action: str
+    created_at: datetime
+    previous_status: str | None = None
+    new_status: str | None = None
+    reason: str | None = None
+
+
+class CaseContextResponse(BaseModel):
+    case_id: uuid.UUID
+    evidence: CaseEvidenceResponse | None
+    audit: list[CaseAuditItem]
+    has_more: bool

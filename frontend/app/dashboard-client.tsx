@@ -1,14 +1,17 @@
 "use client";
 
+import AppSidebar from "@/app/components/app-sidebar";
+
 import {
   FormEvent,
   useCallback,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
 import { useRouter } from "next/navigation";
+import { revokeAndLogout } from "@/lib/logout-client";
+import { emptyTransactionFilters, readTransactionQuery, transactionQuery, PAGE_SIZE, type TransactionFilters, type TransactionSortBy, type TransactionSortDir } from "@/lib/transaction-query";
 
 import type {
   CurrentUser,
@@ -18,32 +21,8 @@ import type {
 import Link from "next/link";
 
 
-type Filters = {
-  account: string;
-  country: string;
-  channel: string;
-  minAmount: string;
-};
-
-
-const initialFilters: Filters = {
-  account: "",
-  country: "",
-  channel: "",
-  minAmount: "",
-};
-
-
-function money(
-  value: string | number,
-) {
-  return new Intl.NumberFormat(
-    "en-US",
-    {
-      style: "currency",
-      currency: "USD",
-    },
-  ).format(Number(value));
+function money(value: string, currency: string) {
+  return `${Number(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
 }
 
 
@@ -60,7 +39,7 @@ function time(value: string) {
 }
 
 
-export default function DashboardClient() {
+export default function DashboardClient({ initialQuery = "" }: { initialQuery?: string }) {
   const router = useRouter();
 
   const [
@@ -80,12 +59,16 @@ export default function DashboardClient() {
   const [
     filters,
     setFilters,
-  ] = useState(initialFilters);
+  ] = useState<TransactionFilters>(() => readTransactionQuery(new URLSearchParams(initialQuery)).filters);
 
   const [
     appliedFilters,
     setAppliedFilters,
-  ] = useState(initialFilters);
+  ] = useState<TransactionFilters>(() => readTransactionQuery(new URLSearchParams(initialQuery)).filters);
+
+  const [offset, setOffset] = useState(() => readTransactionQuery(new URLSearchParams(initialQuery)).offset);
+  const [sortBy, setSortBy] = useState<TransactionSortBy>(() => readTransactionQuery(new URLSearchParams(initialQuery)).sortBy);
+  const [sortDir, setSortDir] = useState<TransactionSortDir>(() => readTransactionQuery(new URLSearchParams(initialQuery)).sortDir);
 
   const [
     loading,
@@ -139,43 +122,12 @@ export default function DashboardClient() {
   const loadTransactions =
     useCallback(
       async (
-        current: Filters,
+        current: TransactionFilters,
+        currentOffset: number,
+        currentSortBy: TransactionSortBy,
+        currentSortDir: TransactionSortDir,
       ) => {
-        const params =
-          new URLSearchParams();
-
-        params.set(
-          "limit",
-          "100",
-        );
-
-        if (current.account) {
-          params.set(
-            "account_ref",
-            current.account,
-          );
-        }
-
-        if (current.country) {
-          params.set(
-            "country_code",
-            current.country.toUpperCase(),
-          );
-        }
-
-        if (current.channel) {
-          params.set(
-            "channel",
-            current.channel,
-          );
-        }
-
-        if (current.minAmount) {
-          params.set(
-            "min_amount",
-            current.minAmount,
-          );
-        }
+        const params = transactionQuery(current, currentOffset, currentSortBy, currentSortDir);
 
         const response =
           await fetch(
@@ -214,6 +166,7 @@ export default function DashboardClient() {
     async function initialize() {
       setLoading(true);
       setError("");
+      setTransactions(null);
 
       try {
         const currentUser =
@@ -225,6 +178,9 @@ export default function DashboardClient() {
 
         await loadTransactions(
           appliedFilters,
+          offset,
+          sortBy,
+          sortDir,
         );
 
       } catch (
@@ -248,48 +204,37 @@ export default function DashboardClient() {
     loadUser,
     loadTransactions,
     appliedFilters,
+    offset,
+    sortBy,
+    sortDir,
   ]);
 
+  useEffect(() => {
+    const restoreFromUrl = () => {
+      const current = readTransactionQuery(new URLSearchParams(window.location.search));
+      setFilters(current.filters);
+      setAppliedFilters(current.filters);
+      setOffset(current.offset);
+      setSortBy(current.sortBy);
+      setSortDir(current.sortDir);
+    };
+    window.addEventListener("popstate", restoreFromUrl);
+    return () => window.removeEventListener("popstate", restoreFromUrl);
+  }, []);
 
-  const metrics =
-    useMemo(() => {
-      const items =
-        transactions?.items ?? [];
-
-      const totalVolume =
-        items.reduce(
-          (
-            total,
-            transaction,
-          ) =>
-            total +
-            Number(
-              transaction.amount,
-            ),
-          0,
-        );
-
-      const highValue =
-        items.filter(
-          (transaction) =>
-            Number(
-              transaction.amount,
-            ) >= 6500,
-        ).length;
-
-      const crossBorder =
-        items.filter(
-          (transaction) =>
-            transaction.country_code
-            !== "LA",
-        ).length;
-
-      return {
-        totalVolume,
-        highValue,
-        crossBorder,
-      };
-    }, [transactions]);
+  function navigateToFilters(nextFilters: TransactionFilters, nextOffset: number, nextSortBy = sortBy, nextSortDir = sortDir) {
+    const query = transactionQuery(nextFilters, nextOffset, nextSortBy, nextSortDir);
+    query.delete("limit");
+    const nextUrl = `/?${query.toString()}`;
+    if (`${window.location.pathname}${window.location.search}` !== nextUrl) {
+      window.history.pushState(null, "", nextUrl);
+    }
+    setFilters(nextFilters);
+    setAppliedFilters(nextFilters);
+    setOffset(nextOffset);
+    setSortBy(nextSortBy);
+    setSortDir(nextSortDir);
+  }
 
 
   function submitFilters(
@@ -297,36 +242,17 @@ export default function DashboardClient() {
   ) {
     event.preventDefault();
 
-    setAppliedFilters(
-      filters,
-    );
+    navigateToFilters(filters, 0);
   }
 
 
   function clearFilters() {
-    setFilters(
-      initialFilters,
-    );
-
-    setAppliedFilters(
-      initialFilters,
-    );
+    navigateToFilters(emptyTransactionFilters, 0);
   }
 
 
   async function logout() {
-    await fetch(
-      "/api/auth/logout",
-      {
-        method: "POST",
-      },
-    );
-
-    router.replace(
-      "/login",
-    );
-
-    router.refresh();
+    await revokeAndLogout(router, setError);
   }
 
 
@@ -343,57 +269,7 @@ export default function DashboardClient() {
 
   return (
     <main className="dashboard">
-      <aside className="sidebar">
-        <div>
-          <div className="logoRow">
-            <div className="brandMark">
-              BG
-            </div>
-
-            <div>
-              <strong>
-                BANKGUARD
-              </strong>
-
-              <span>
-                AI
-              </span>
-            </div>
-          </div>
-
-          <nav>
-            <Link
-              className="active"
-              href="/"
-            >
-              Transaction Monitoring
-            </Link>
-
-            <a href="/fraud">
-              Fraud Alerts
-            </a>
-
-            <Link href="/cases">
-              Investigations
-            </Link>
-
-            <Link href="/decisions">
-              Decision Analytics
-            </Link>
-
-            <Link href="/security">
-              Security Operations
-            </Link>
-          </nav>
-        </div>
-
-        <button
-          className="signOut"
-          onClick={logout}
-        >
-          Sign out
-        </button>
-      </aside>
+      <AppSidebar user={user} onLogout={logout} />
 
       <section className="dashboardContent">
         <header className="dashboardHeader">
@@ -436,67 +312,10 @@ export default function DashboardClient() {
           </div>
         )}
 
-        <section className="metricGrid">
-          <article>
-            <span>
-              Transactions
-            </span>
-
-            <strong>
-              {transactions?.total ??
-                0}
-            </strong>
-
-            <small>
-              Matching current filters
-            </small>
-          </article>
-
-          <article>
-            <span>
-              Volume
-            </span>
-
-            <strong>
-              {money(
-                metrics.totalVolume,
-              )}
-            </strong>
-
-            <small>
-              Visible result set
-            </small>
-          </article>
-
-          <article>
-            <span>
-              High Value
-            </span>
-
-            <strong>
-              {metrics.highValue}
-            </strong>
-
-            <small>
-              ≥ $6,500
-            </small>
-          </article>
-
-          <article>
-            <span>
-              Cross-border
-            </span>
-
-            <strong>
-              {metrics.crossBorder}
-            </strong>
-
-            <small>
-              Country ≠ LA
-            </small>
-          </article>
+        <section className="metricGrid" aria-label="Transaction summary">
+          <article><span>Matching transactions</span><strong>{transactions?.total ?? 0}</strong><small>All pages, current filters</small></article>
+          <article><span>Displayed transactions</span><strong>{transactions?.items.length ?? 0}</strong><small>Current page only</small></article>
         </section>
-
         <section
           className="monitoringPanel"
           id="monitoring"
@@ -630,20 +449,35 @@ export default function DashboardClient() {
             </button>
           </form>
 
+          <div className="sortBar" aria-label="Transaction sorting">
+            <label htmlFor="transactionSortBy">Sort by</label>
+            <select id="transactionSortBy" value={sortBy} onChange={(event) => navigateToFilters(appliedFilters, 0, event.target.value as TransactionSortBy, sortDir)}>
+              <option value="occurred_at">Time</option>
+              <option value="amount">Amount</option>
+              <option value="transaction_ref">Transaction reference</option>
+            </select>
+            <label htmlFor="transactionSortDir">Order</label>
+            <select id="transactionSortDir" value={sortDir} onChange={(event) => navigateToFilters(appliedFilters, 0, sortBy, event.target.value as TransactionSortDir)}>
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+            <span role="status">Sorted by {sortBy === "occurred_at" ? "time" : sortBy === "transaction_ref" ? "transaction reference" : "amount"}, {sortDir === "asc" ? "ascending" : "descending"}{sortBy === "amount" ? ". Amounts use recorded currencies without conversion." : ""}</span>
+          </div>
+
           <div className="tableScroll">
             <table>
               <thead>
                 <tr>
-                  <th>
-                    TRANSACTION
+                  <th aria-sort={sortBy === "transaction_ref" ? sortDir === "asc" ? "ascending" : "descending" : undefined}>
+                    TRANSACTION {sortBy === "transaction_ref" && (sortDir === "asc" ? "↑" : "↓")}
                   </th>
 
                   <th>
                     ACCOUNT
                   </th>
 
-                  <th>
-                    AMOUNT
+                  <th aria-sort={sortBy === "amount" ? sortDir === "asc" ? "ascending" : "descending" : undefined}>
+                    AMOUNT {sortBy === "amount" && (sortDir === "asc" ? "↑" : "↓")}
                   </th>
 
                   <th>
@@ -658,8 +492,8 @@ export default function DashboardClient() {
                     STATUS
                   </th>
 
-                  <th>
-                    TIME
+                  <th aria-sort={sortBy === "occurred_at" ? sortDir === "asc" ? "ascending" : "descending" : undefined}>
+                    TIME {sortBy === "occurred_at" && (sortDir === "asc" ? "↑" : "↓")}
                   </th>
                 </tr>
               </thead>
@@ -670,22 +504,10 @@ export default function DashboardClient() {
                     (
                       transaction,
                     ) => {
-                      const suspicious =
-                        Number(
-                          transaction.amount,
-                        ) >= 6500 ||
-                        transaction.country_code
-                          !== "LA";
-
                       return (
                         <tr
                           key={
                             transaction.id
-                          }
-                          className={
-                            suspicious
-                              ? "flaggedRow"
-                              : ""
                           }
                         >
                           <td>
@@ -700,11 +522,9 @@ export default function DashboardClient() {
                                 transaction.transaction_type
                               }
                             </small>
-                            {user?.permissions.some(permission => permission === "*" || permission === "fraud.read") && (
-                              <Link href={`/transactions/${transaction.id}`} style={{ color: "var(--cyan)", display: "inline-block", marginTop: 8 }}>
-                                Inspect ML
-                              </Link>
-                            )}
+                            <Link href={`/transactions/${transaction.id}?return=${encodeURIComponent(`?${transactionQuery(appliedFilters, offset, sortBy, sortDir).toString()}`)}`} style={{ color: "var(--cyan)", display: "inline-block", marginTop: 8 }}>
+                              View details
+                            </Link>
                           </td>
 
                           <td>
@@ -717,19 +537,13 @@ export default function DashboardClient() {
                             <strong>
                               {money(
                                 transaction.amount,
+                                transaction.currency,
                               )}
                             </strong>
                           </td>
 
                           <td>
                             <span
-                              className={
-                                transaction.country_code
-                                  !==
-                                "LA"
-                                  ? "riskText"
-                                  : ""
-                              }
                             >
                               {
                                 transaction.country_code
@@ -764,6 +578,12 @@ export default function DashboardClient() {
                   )}
               </tbody>
             </table>
+          </div>
+          {transactions?.items.length === 0 && <p className="muted" role="status" style={{ padding: 20 }}>No transactions match these filters.</p>}
+          <div className="transactionPager" aria-label="Transaction pages">
+            <button type="button" disabled={offset === 0 || loading} onClick={() => navigateToFilters(appliedFilters, Math.max(0, offset - PAGE_SIZE))}>Previous</button>
+            <span>{transactions ? `Page ${Math.floor(offset / PAGE_SIZE) + 1} of ${Math.max(1, Math.ceil(transactions.total / PAGE_SIZE))}` : "No page loaded"}</span>
+            <button type="button" disabled={!transactions || offset + PAGE_SIZE >= transactions.total || loading} onClick={() => navigateToFilters(appliedFilters, offset + PAGE_SIZE)}>Next</button>
           </div>
         </section>
       </section>

@@ -55,7 +55,7 @@ def test_permitted_roles_real_model_response(client, role):
     assert 0 <= result['ml_score'] <= 100
     assert len(result['features']) == 20
     assert result['rule'] is None
-    assert result['model_version'] == 'synthetic-logistic-v1'
+    assert result['model_version'] == 'synthetic-logistic-v2'
     assert response.headers['cache-control'] == 'no-store'
 
 

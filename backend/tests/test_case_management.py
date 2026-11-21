@@ -5,11 +5,50 @@ from app.models.investigation_case import (
     InvestigationCase,
 )
 from app.services.case_management import (
+    StaleCaseStatusError,
     InvalidCaseTransitionError,
     append_case_note,
     apply_case_transition,
     priority_from_severity,
 )
+
+
+def test_stale_case_status_rejected_before_mutation():
+    from datetime import datetime, timezone
+    from unittest.mock import Mock
+    from app.services.case_management import update_case
+
+    case = build_case("investigating")
+    case.updated_at = datetime(2026, 11, 17, tzinfo=timezone.utc)
+    db = Mock()
+    db.scalar.return_value = case
+    with pytest.raises(StaleCaseStatusError):
+        update_case(db, case_id=case.id, actor_ref="analyst@bankguard.demo",
+                    expected_status="open", expected_updated_at=case.updated_at,
+                    new_status="pending_review",
+                    priority=None, assigned_to=None, note="Reviewed evidence.")
+    assert case.status == "investigating"
+    assert case.notes is None
+    assert db.scalar.call_count == 1
+
+
+def test_stale_case_revision_rejected_even_when_status_unchanged():
+    from datetime import datetime, timedelta, timezone
+    from unittest.mock import Mock
+    from app.services.case_management import update_case
+
+    case = build_case("investigating")
+    case.updated_at = datetime(2026, 11, 17, tzinfo=timezone.utc)
+    db = Mock()
+    db.scalar.return_value = case
+    with pytest.raises(StaleCaseStatusError):
+        update_case(db, case_id=case.id, actor_ref="analyst@bankguard.demo",
+                    expected_status="investigating",
+                    expected_updated_at=case.updated_at - timedelta(seconds=1),
+                    new_status=None, priority="high", assigned_to=None,
+                    note="Additional evidence.")
+    assert case.notes is None
+    assert db.scalar.call_count == 1
 
 
 def build_case(

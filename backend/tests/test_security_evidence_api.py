@@ -2,6 +2,7 @@
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 from uuid import UUID
+import pytest
 
 from fastapi.testclient import TestClient
 
@@ -91,5 +92,26 @@ def test_invalid_uuid_returns_422():
                 "/api/v1/security/alerts/not-a-uuid/evidence"
             )
         assert response.status_code == 422
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.mark.parametrize("role,expected", [("admin", 200), ("security_analyst", 200), ("fraud_analyst", 403)])
+def test_new_device_evidence_uses_existing_rbac_and_rule_filter(role, expected):
+    record = {
+        "alert_id": ALERT_ID, "alert_type": "NEW_DEVICE_LOGIN",
+        "evidence": {"rule_code": "NEW_DEVICE_LOGIN", "event_count": 1},
+    }
+    try:
+        client, db = make_client(role, record)
+        with client:
+            response = client.get(URL)
+        assert response.status_code == expected
+        if expected == 200:
+            assert response.json()["alert_type"] == "NEW_DEVICE_LOGIN"
+            compiled = db.execute.call_args.args[0].compile()
+            assert ["FAILED_LOGIN_BURST", "NEW_DEVICE_LOGIN"] in compiled.params.values()
+        else:
+            db.execute.assert_not_called()
     finally:
         app.dependency_overrides.clear()

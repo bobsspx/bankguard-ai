@@ -6,7 +6,9 @@ from uuid import UUID
 from app.services.security_alert_preview import (
     SecurityAlertPreview,
 )
-
+from app.services.security_alert_identity import (
+    SUPPORTED_SECURITY_RULES,
+)
 
 EVIDENCE_VERSION = "security-evidence-v1"
 
@@ -17,7 +19,7 @@ def build_security_evidence(
     """Return a JSON-compatible evidence snapshot."""
 
     # 1. Validate supported alert type
-    if preview.alert_type != "FAILED_LOGIN_BURST":
+    if preview.alert_type not in SUPPORTED_SECURITY_RULES:
         raise ValueError("Unsupported alert type")
 
     # 2. Validate triggering event UUID

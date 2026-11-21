@@ -21,28 +21,29 @@ def load_prior_device_logins(
     This adapter does not claim the database contains
     the account's complete lifetime history.
     """
-    current = db.scalar(
-        select(LoginEvent).where(
-            LoginEvent.id == current_event_id,
-            LoginEvent.account_id == account_id,
+    with db.no_autoflush:
+        current = db.scalar(
+            select(LoginEvent).where(
+                LoginEvent.id == current_event_id,
+                LoginEvent.account_id == account_id,
+            )
         )
-    )
 
-    if current is None:
-        raise ValueError("Login event not found")
+        if current is None:
+            raise ValueError("Login event not found")
 
-    rows = db.scalars(
-        select(LoginEvent)
-        .where(
-            LoginEvent.account_id == account_id,
-            LoginEvent.id != current_event_id,
-            LoginEvent.occurred_at < current.occurred_at,
-        )
-        .order_by(
-            LoginEvent.occurred_at.asc(),
-            LoginEvent.id.asc(),
-        )
-    ).all()
+        rows = db.scalars(
+            select(LoginEvent)
+            .where(
+                LoginEvent.account_id == account_id,
+                LoginEvent.id != current_event_id,
+                LoginEvent.occurred_at < current.occurred_at,
+            )
+            .order_by(
+                LoginEvent.occurred_at.asc(),
+                LoginEvent.id.asc(),
+            )
+        ).all()
 
     def convert(row: LoginEvent) -> DeviceLogin:
         return DeviceLogin(

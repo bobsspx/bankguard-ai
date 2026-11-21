@@ -13,6 +13,24 @@
   --cyan: #62b9ff;
   --red: #ff6b72;
   --amber: #f1bd5b;
+  --sidebar-bg: #080b0f;
+  --focus-ring: #62b9ff;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --background: #f3f6fa;
+  --surface: #ffffff;
+  --surface-2: #eaf0f6;
+  --border: #cbd6e2;
+  --text: #172638;
+  --muted: #4b6074;
+  --green: #087447;
+  --cyan: #075b9f;
+  --red: #b4233b;
+  --amber: #825600;
+  --sidebar-bg: #e8eef5;
+  --focus-ring: #075b9f;
 }
 
 * {
@@ -416,6 +434,7 @@ button {
 
 .userBadge {
   text-align: right;
+  min-width: 0;
 }
 
 .userBadge span {
@@ -434,6 +453,7 @@ button {
   margin-top: 8px;
 
   font-size: 13px;
+  overflow-wrap: anywhere;
 }
 
 .metricGrid {
@@ -577,6 +597,33 @@ button {
 
 .tableScroll {
   overflow-x: auto;
+}
+
+.sortBar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 190px) auto minmax(0, 125px);
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.sortBar select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+
+.sortBar span { grid-column: 1 / -1; color: var(--muted); }
+.sortBar select:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+
+@media (max-width: 600px) {
+  .sortBar { grid-template-columns: auto minmax(0, 1fr); }
 }
 
 table {
@@ -734,6 +781,10 @@ td small {
       1fr;
   }
 
+  .securityDashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .sidebar {
     position: static;
 
@@ -754,6 +805,31 @@ td small {
 
   .sidebar nav {
     display: none;
+  }
+
+  .securitySidebar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .securitySidebar > div {
+    min-width: 0;
+  }
+
+  .securitySidebar nav {
+    display: flex;
+    gap: 4px;
+    margin-top: 12px;
+    overflow-x: auto;
+  }
+
+  .securitySidebar nav a {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .securitySidebar .signOut {
+    align-self: flex-start;
   }
 
   .signOut {
@@ -809,6 +885,7 @@ td small {
 
 .fraudHeaderActions {
   display: flex;
+  min-width: 0;
 
   align-items:
     flex-end;
@@ -956,8 +1033,7 @@ td small {
 
 
 .risk-critical {
-  color:
-    #ff858b;
+  color: var(--red);
 
   border:
     1px solid #71353a;
@@ -973,8 +1049,7 @@ td small {
 
 
 .risk-high {
-  color:
-    #f1bd5b;
+  color: var(--amber);
 
   border:
     1px solid #674f22;
@@ -990,8 +1065,7 @@ td small {
 
 
 .risk-medium {
-  color:
-    #62b9ff;
+  color: var(--cyan);
 
   border:
     1px solid #2d5577;
@@ -1046,25 +1120,21 @@ td small {
   padding:
     5px 7px;
 
-  border:
-    1px solid #28313b;
+  border: 1px solid var(--border);
 
   border-radius:
     5px;
 
-  background:
-    #0d1218;
+  background: var(--surface-2);
 
-  color:
-    #8793a2;
+  color: var(--muted);
 
   font-size: 9px;
 }
 
 
 .ruleList b {
-  color:
-    #cbd3dd;
+  color: var(--text);
 
   font-weight: 700;
 }
@@ -1110,16 +1180,14 @@ td small {
 
 
 .alertCardTop strong {
-  color:
-    #e7ebf0;
+  color: var(--text);
 
   font-size: 13px;
 }
 
 
 .alertCardTop span {
-  color:
-    #657284;
+  color: var(--muted);
 
   font-size: 10px;
 }
@@ -1157,8 +1225,7 @@ td small {
   margin:
     18px 0 8px;
 
-  color:
-    #d8dee6;
+  color: var(--text);
 
   font-size: 15px;
 }
@@ -1168,8 +1235,7 @@ td small {
   margin:
     0 0 15px;
 
-  color:
-    #84909f;
+  color: var(--muted);
 
   font-size: 12px;
 
@@ -1178,8 +1244,7 @@ td small {
 
 
 .alertCard small {
-  color:
-    #586474;
+  color: var(--muted);
 
   font-size: 10px;
 }
@@ -1487,16 +1552,14 @@ td small {
 .caseWorkspaceHeader p {
   margin: 0;
 
-  color:
-    #718092;
+  color: var(--muted);
 
   font-size: 12px;
 }
 
 
 .caseWorkspaceHeader p strong {
-  color:
-    #dce2e9;
+  color: var(--text);
 }
 
 
@@ -1550,8 +1613,7 @@ td small {
 
   gap: 8px;
 
-  color:
-    #8491a1;
+  color: var(--muted);
 
   font-size: 12px;
 }
@@ -1561,6 +1623,26 @@ td small {
   min-height: 130px;
 
   resize: vertical;
+}
+
+.caseEditor .primaryButton {
+  width: 100%;
+}
+
+.caseContextIds {
+  overflow-wrap: anywhere;
+}
+
+.caseContextAudit {
+  display: grid;
+  gap: 12px;
+  padding-left: 20px;
+}
+
+.caseContextPager {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 
@@ -1617,14 +1699,12 @@ td small {
 
   gap: 5px;
 
-  background:
-    #0a0e13;
+  background: var(--surface-2);
 }
 
 
 .caseMetadata span {
-  color:
-    #657284;
+  color: var(--muted);
 
   font-size: 10px;
 
@@ -1637,8 +1717,7 @@ td small {
 
 
 .caseMetadata strong {
-  color:
-    #ccd4de;
+  color: var(--text);
 
   font-size: 11px;
 
@@ -1711,16 +1790,13 @@ td small {
   padding:
     8px 11px;
 
-  border:
-    1px solid #2a3744;
+  border: 1px solid var(--border);
 
   border-radius: 7px;
 
-  color:
-    #9fcfff;
+  color: var(--cyan);
 
-  background:
-    #0c1218;
+  background: var(--surface-2);
 
   text-decoration:
     none;
@@ -1782,13 +1858,253 @@ td small {
   }
 }
 
+/* Shared application controls */
+.transactionPager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  color: var(--muted);
+}
+
+.transactionPager button,
+.transactionDetail button {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.transactionPager button:disabled { opacity: .45; cursor: not-allowed; }
+.transactionOverview { padding: 24px; margin-top: 24px; }
+.transactionOverview h2 { margin: 0 0 8px; }
+.transactionAmount { display: block; font-size: 30px; margin-bottom: 20px; }
+.transactionOverview dl { display: grid; grid-template-columns: minmax(110px, 180px) minmax(0, 1fr); gap: 12px 20px; margin: 0; }
+.transactionOverview dt { color: var(--muted); }
+.transactionOverview dd { margin: 0; overflow-wrap: anywhere; }
+
+@media (max-width: 600px) {
+  .transactionPager { flex-wrap: wrap; }
+  .transactionOverview dl { grid-template-columns: 1fr; gap: 4px; }
+  .transactionOverview dd { margin-bottom: 12px; }
+}
+
+:root[data-sidebar="collapsed"] .dashboard {
+  grid-template-columns: 76px minmax(0, 1fr);
+}
+
+.sidebar.appSidebar {
+  min-width: 0;
+  background: var(--sidebar-bg);
+}
+
+.appSidebarTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.appSidebar .logoRow {
+  min-width: 0;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.appBrandText strong,
+.appBrandText span {
+  display: block;
+}
+
+.appSidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--muted);
+}
+
+.appSidebar nav a.active {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.appNavIcon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--cyan);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.appSidebarBottom {
+  display: grid;
+  gap: 8px;
+}
+
+.appSidebarBottom button,
+.appCollapseToggle,
+.appMobileToggle {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.appSidebarBottom button {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 42px;
+  padding: 7px 9px;
+  text-align: left;
+}
+
+.appCollapseToggle,
+.appMobileToggle {
+  min-width: 34px;
+  min-height: 34px;
+}
+
+.appMobileToggle {
+  display: none;
+}
+
+.appSidebar.isCollapsed .appBrandText,
+.appSidebar.isCollapsed .appNavLabel {
+  display: none;
+}
+
+.sidebar.appSidebar.isCollapsed { padding: 18px 12px; }
+.appSidebar.isCollapsed .appSidebarTop { flex-direction: column; }
+.appSidebar.isCollapsed .brandMark { width: 32px; height: 32px; }
+.appSidebar.isCollapsed .appSidebarBottom button { min-width: 0; }
+
+.appSidebar.isCollapsed nav a,
+.appSidebar.isCollapsed .appSidebarBottom button {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+:root[data-theme="light"] .brandMark,
+:root[data-theme="light"] .loginPanel,
+:root[data-theme="light"] .loginForm,
+:root[data-theme="light"] .caseWorkspace,
+:root[data-theme="light"] .caseEditor,
+:root[data-theme="light"] .caseTimeline,
+:root[data-theme="light"] .monitoringPanel,
+:root[data-theme="light"] .metricGrid article {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+:root[data-theme="light"] .loginForm label {
+  color: var(--muted);
+}
+
+:root[data-theme="light"] :is(input, select, textarea),
+:root[data-theme="light"] :is(.clearButton, .refreshButton, .signOut) {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+:root[data-theme="light"] :is(.eyebrow, .metricGrid span, .metricGrid small, th, td, td strong, td small, .panelTitle > span) {
+  color: var(--muted);
+}
+
+:root[data-theme="light"] :is(td strong, .caseMetadata strong, .logoRow strong) {
+  color: var(--text);
+}
+
+:root[data-theme="light"] :is(td, .caseTable td) {
+  border-color: var(--border);
+}
+
+@media (max-width: 800px) {
+  :root[data-sidebar="collapsed"] .dashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar.appSidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .appSidebar .appMobileToggle {
+    display: block;
+    margin-left: auto;
+  }
+
+  .appSidebar .appCollapseToggle {
+    display: none;
+  }
+
+  .appSidebar nav,
+  .securitySidebar.appSidebar nav {
+    display: none;
+  }
+
+  .appSidebar.mobileOpen nav,
+  .securitySidebar.appSidebar.mobileOpen nav {
+    display: grid;
+    margin-top: 12px;
+    overflow: visible;
+  }
+
+  .appSidebar.isCollapsed .appBrandText,
+  .appSidebar.isCollapsed .appNavLabel {
+    display: block;
+  }
+
+  .sidebar.appSidebar.isCollapsed { padding: 18px; }
+  .appSidebar.isCollapsed .appSidebarTop { flex-direction: row; }
+  .appSidebar.isCollapsed .brandMark { width: 42px; height: 42px; }
+
+  .appSidebar.isCollapsed nav a,
+  .appSidebar.isCollapsed .appSidebarBottom button {
+    justify-content: flex-start;
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+
+  .appSidebarBottom {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .finalReviewPanel {
   margin-top: 24px;
-  border: 1px solid #25303a;
+  border: 1px solid var(--border);
   border-radius: 14px;
-  background: #0c1117;
+  background: var(--surface);
+  color: var(--text);
   padding: 28px;
 }
+
+.finalReviewPanel[aria-label="Case evidence and audit"] h3 { margin: 0 0 18px; }
+.finalReviewPanel[aria-label="Case evidence and audit"] h4 { margin: 24px 0 10px; }
 
 .finalReviewHeader {
   display: flex;
@@ -1805,10 +2121,10 @@ td small {
 }
 
 .finalDecisionBadge {
-  border: 1px solid #2e7d58;
+  border: 1px solid var(--green);
   border-radius: 999px;
   padding: 8px 12px;
-  color: #55e39a;
+  color: var(--green);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -1823,17 +2139,17 @@ td small {
 .decisionForm label {
   display: grid;
   gap: 9px;
-  color: #8da2b8;
+  color: var(--muted);
   font-size: 14px;
 }
 
 .decisionForm select,
 .decisionForm textarea {
   width: 100%;
-  border: 1px solid #293541;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #0e141a;
-  color: #f4f7fa;
+  background: var(--surface);
+  color: var(--text);
   padding: 14px 16px;
   font: inherit;
 }
@@ -1860,23 +2176,23 @@ td small {
 }
 
 .decisionResult > div {
-  border: 1px solid #25303a;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 16px;
-  background: #0a0f14;
+  background: var(--surface-2);
 }
 
 .decisionResult span {
   display: block;
   margin-bottom: 8px;
-  color: #7890a8;
+  color: var(--muted);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .decisionResult strong {
-  color: #f4f7fa;
+  color: var(--text);
 }
 
 .decisionReasonResult {
@@ -1885,7 +2201,7 @@ td small {
 
 .decisionReasonResult p {
   margin: 0;
-  color: #c1ccd6;
+  color: var(--text);
   line-height: 1.7;
 }
 
@@ -1943,7 +2259,7 @@ td small {
 
 
 .decisionMetricGrid span {
-  color: #788596;
+  color: var(--muted);
 
   font-size: 12px;
 }
@@ -1952,7 +2268,7 @@ td small {
 .decisionMetricGrid strong {
   margin: 12px 0;
 
-  color: #edf1f5;
+  color: var(--text);
 
   font-size: 29px;
 
@@ -1961,7 +2277,7 @@ td small {
 
 
 .decisionMetricGrid small {
-  color: #5f6a78;
+  color: var(--muted);
 }
 
 
@@ -2095,8 +2411,7 @@ td small {
 
 
 .decisionCaseLink {
-  color:
-    #dce4ee;
+  color: var(--text);
 
   font-weight: 700;
 
@@ -2115,8 +2430,7 @@ td small {
 
   line-height: 1.6;
 
-  color:
-    #7e8a99;
+  color: var(--muted);
 }
 
 
@@ -2125,8 +2439,7 @@ td small {
 
   text-align: center;
 
-  color:
-    #687586;
+  color: var(--muted);
 }
 
 

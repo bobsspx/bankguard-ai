@@ -1,15 +1,17 @@
-from pydantic import field_validator
+from typing import Literal
+
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     app_name: str = "BankGuard AI"
-    app_env: str = "development"
+    app_env: Literal["development", "test", "production"] = "development"
 
     database_url: str
 
     jwt_secret: str = "change-me"
-    jwt_algorithm: str = "HS256"
+    jwt_algorithm: Literal["HS256"] = "HS256"
     jwt_issuer: str = "bankguard-api"
     jwt_audience: str = "bankguard-web"
     
@@ -35,6 +37,12 @@ class Settings(BaseSettings):
             )
 
         return value
+
+    @model_validator(mode="after")
+    def require_production_jwt_secret(self):
+        if self.app_env == "production" and len(self.jwt_secret.encode("utf-8")) < 32:
+            raise ValueError("Production JWT secret must contain at least 32 bytes.")
+        return self
 
 
 settings = Settings()

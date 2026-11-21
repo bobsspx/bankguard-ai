@@ -6,6 +6,7 @@ import {
   proxyBackendGet,
   proxyBackendJson,
 } from "@/lib/backend-proxy";
+import { rejectCrossOrigin } from "@/lib/request-origin";
 
 
 type RouteContext = {
@@ -38,6 +39,8 @@ export async function PATCH(
   request: NextRequest,
   context: RouteContext,
 ) {
+  const originError = rejectCrossOrigin(request);
+  if (originError) return originError;
   const {
     caseId,
   } =

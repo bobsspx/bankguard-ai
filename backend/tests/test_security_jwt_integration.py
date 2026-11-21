@@ -13,7 +13,7 @@ from app.core.security import create_access_token
 def make_client(role, *, active=True, session_version=1):
     user = SimpleNamespace(
         id=uuid4(),
-        email="synthetic-security@example.test",
+        email="synthetic-security@bankguard-demo.com",
         role=role,
         is_active=active,
         session_version=session_version,
@@ -56,6 +56,20 @@ def test_real_jwt_security_analyst_allowed():
 
         assert response.status_code == 200
         assert response.json()["total_login_events"] == 0
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_real_jwt_current_user_returns_valid_email():
+    try:
+        client, token, _ = make_client("security_analyst")
+        with client:
+            response = client.get(
+                "/api/v1/auth/me",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+        assert response.status_code == 200
+        assert response.json()["email"] == "synthetic-security@bankguard-demo.com"
     finally:
         app.dependency_overrides.clear()
 

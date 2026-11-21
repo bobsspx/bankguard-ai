@@ -30,7 +30,7 @@ type Inspection = {
   features: Record<string, string | number | null>;
 };
 
-export default function MLInspectionClient({ transactionId }: { transactionId: string }) {
+export default function MLInspectionClient({ transactionId, embedded = false }: { transactionId: string; embedded?: boolean }) {
   const router = useRouter();
   const [data, setData] = useState<Inspection | null>(null);
   const [error, setError] = useState("");
@@ -105,9 +105,10 @@ export default function MLInspectionClient({ transactionId }: { transactionId: s
     }, 1000);
   }
 
+  const Container = embedded ? "section" : "main";
   return (
-    <main className={styles.page}>
-      <Link className={styles.back} href="/">← Transaction Monitoring</Link>
+    <Container className={styles.page}>
+      {!embedded && <Link className={styles.back} href="/">← Transaction Monitoring</Link>}
       <header className={styles.header}>
         <div><p className="eyebrow">BANKGUARD / TRANSACTION INTELLIGENCE</p>
           <h1>ML inspection</h1><p className="muted">Compare a model assessment with the recorded rules result.</p></div>
@@ -194,6 +195,6 @@ export default function MLInspectionClient({ transactionId }: { transactionId: s
           </details>
         </>
       )}
-    </main>
+    </Container>
   );
 }

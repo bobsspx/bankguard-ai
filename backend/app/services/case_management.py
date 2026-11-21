@@ -44,6 +44,10 @@ class InvalidCaseTransitionError(
     pass
 
 
+class StaleCaseStatusError(Exception):
+    pass
+
+
 class InvalidCaseAssigneeError(
     Exception
 ):
@@ -435,6 +439,8 @@ def update_case(
     *,
     case_id: uuid.UUID,
     actor_ref: str,
+    expected_status: str,
+    expected_updated_at: datetime,
     new_status: str | None,
     priority: str | None,
     assigned_to: str | None,
@@ -453,6 +459,9 @@ def update_case(
 
     if case is None:
         raise CaseNotFoundError
+
+    if case.status != expected_status or case.updated_at != expected_updated_at:
+        raise StaleCaseStatusError("Case changed. Refresh and retry.")
 
     alert = db.scalar(
         select(Alert)

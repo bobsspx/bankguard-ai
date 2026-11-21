@@ -1,5 +1,7 @@
 "use client";
 
+import AppSidebar from "@/app/components/app-sidebar";
+
 import {
   useCallback,
   useEffect,
@@ -9,6 +11,7 @@ import {
 import {
   useRouter,
 } from "next/navigation";
+import { revokeAndLogout } from "@/lib/logout-client";
 
 import type {
   CurrentUser,
@@ -303,18 +306,7 @@ export default function FraudClient() {
 
 
   async function logout() {
-    await fetch(
-      "/api/auth/logout",
-      {
-        method: "POST",
-      },
-    );
-
-    router.replace(
-      "/login",
-    );
-
-    router.refresh();
+    await revokeAndLogout(router, setError);
   }
 
 
@@ -339,60 +331,7 @@ export default function FraudClient() {
     <main
       className="dashboard"
     >
-      <aside
-        className="sidebar"
-      >
-        <div>
-          <div
-            className="logoRow"
-          >
-            <div
-              className="brandMark"
-            >
-              BG
-            </div>
-
-            <div>
-              <strong>
-                BANKGUARD
-              </strong>
-
-              <span>
-                AI
-              </span>
-            </div>
-          </div>
-
-          <nav>
-            <Link href="/">
-                Transaction
-                Monitoring
-            </Link>
-
-            <Link
-              href="/fraud"
-              className="active"
-            >
-              Fraud Alerts
-            </Link>
-
-            <Link href="/cases">
-              Investigations
-            </Link>
-
-            <Link href="/security">
-              Security Operations
-            </Link>
-          </nav>
-        </div>
-
-        <button
-          className="signOut"
-          onClick={logout}
-        >
-          Sign out
-        </button>
-      </aside>
+      <AppSidebar user={user} onLogout={logout} />
 
 
       <section

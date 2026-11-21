@@ -119,6 +119,10 @@ class TransactionFilters(BaseModel):
         ge=0,
     )
 
+    sort_by: Literal["occurred_at", "amount", "transaction_ref"] = "occurred_at"
+
+    sort_dir: Literal["asc", "desc"] = "desc"
+
     account_ref: str | None = Field(
         default=None,
         max_length=50,

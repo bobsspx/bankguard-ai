@@ -5,11 +5,14 @@ import {
 import {
   proxyBackendJson,
 } from "@/lib/backend-proxy";
+import { rejectCrossOrigin } from "@/lib/request-origin";
 
 
 export async function POST(
   request: NextRequest,
 ) {
+  const originError = rejectCrossOrigin(request);
+  if (originError) return originError;
   let body: unknown;
 
   try {

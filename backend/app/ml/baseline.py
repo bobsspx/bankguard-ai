@@ -5,7 +5,7 @@ from pathlib import Path
 from app.services.ml_features import FEATURE_NAMES, FEATURE_VERSION
 
 CATEGORICAL = {'currency', 'channel', 'transaction_type', 'merchant_category', 'country_code'}
-MODEL_VERSION = 'synthetic-logistic-v1'
+MODEL_VERSION = 'synthetic-logistic-v2'
 DEFAULT_MODEL = Path(__file__).resolve().parent / 'artifacts' / 'baseline.json'
 
 

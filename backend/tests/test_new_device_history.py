@@ -5,6 +5,10 @@ from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
+from app.models.login_event import LoginEvent
 
 from app.services.new_device_history import (
     load_prior_device_logins,
@@ -15,6 +19,31 @@ from app.services.new_device_detection import (
 
 
 NOW = datetime(2026, 10, 28, tzinfo=timezone.utc)
+
+
+def test_read_only_history_does_not_flush_pending_login():
+    engine = create_engine("sqlite:///:memory:")
+    LoginEvent.__table__.create(engine)
+    account_id, event_id = uuid4(), uuid4()
+    try:
+        with engine.begin() as connection:
+            connection.execute(LoginEvent.__table__.insert().values(
+                id=event_id, account_id=account_id, success=True,
+                ip_address="127.0.0.1", country_code="TH", occurred_at=NOW,
+            ))
+        with Session(engine) as db:
+            # Deliberately incomplete pending row: an autoflush would fail.
+            pending = LoginEvent(account_id=account_id)
+            db.add(pending)
+            current, history = load_prior_device_logins(
+                db, account_id=account_id, current_event_id=event_id,
+            )
+            assert current.event_id == event_id
+            assert history == []
+            assert pending in db.new
+            assert pending.id is None
+    finally:
+        engine.dispose()
 
 
 def event(account, device, minutes):

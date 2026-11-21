@@ -9,6 +9,8 @@ from app.models.transaction import Transaction
 from app.models.staff_user import StaffUser
 from app.models.fraud_decision import FraudDecision
 from app.models.security_alert_evidence import SecurityAlertEvidence
+from app.models.device_history_coverage import DeviceHistoryCoverage
+from app.models.login_rate_limit import LoginRateLimit
 
 __all__ = [
     "Account",
@@ -21,4 +23,5 @@ __all__ = [
     "AuditLog",
     "StaffUser",
     "FraudDecision",
+    "DeviceHistoryCoverage",
 ]

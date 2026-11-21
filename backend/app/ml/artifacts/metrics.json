@@ -1,10 +1,17 @@
 {
-  "model_version": "synthetic-logistic-v1",
-  "dataset_manifest_sha256": "f19212f199b8ac9161b8e9a529a104f5685308b8b29e37289af7f77a7f3ca712",
+  "model_version": "synthetic-logistic-v2",
+  "dataset_manifest_sha256": "26c78fce9a24c9251b04b8928d10d16f77cbfcd71730f424be2c9783225f16f3",
+  "dataset_generation": {
+    "dataset_version": "synthetic-transactions-v1",
+    "seed": 42,
+    "count": 3000,
+    "accounts": 30,
+    "feature_source_sha256": "4f77122de689727b10b764f8c4e6c55f6388acc95c8eea58940ac00e36dc46fc"
+  },
   "runtime": {
-    "python": "3.12.14",
-    "sklearn": "1.8.0",
-    "numpy": "2.3.5"
+    "python": "3.14.0",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.3"
   },
   "threshold": 0.21,
   "threshold_policy": "validation F1 over 0.05..0.95 step 0.01, ties prefer higher",
@@ -87,5 +94,5 @@
       }
     }
   },
-  "model_sha256": "133da27a9f60f7db2b8b118681813bbbac73831fe12cf28175dc0a57d41f09f2"
+  "model_sha256": "1a22af7e440ae8ff5cf41d61f15535afca9c143803b0ce456eefdaa5bd948109"
 }

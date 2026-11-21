@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import (
     BaseModel,
     Field,
+    field_validator,
 )
 
 
@@ -26,6 +27,14 @@ class FraudDecisionCreateRequest(
         min_length=10,
         max_length=4000,
     )
+
+    @field_validator("decision_reason")
+    @classmethod
+    def require_meaningful_reason(cls, value: str) -> str:
+        clean = value.strip()
+        if len(clean) < 10:
+            raise ValueError("Decision reason must contain at least 10 characters.")
+        return clean
 
 
 class FraudDecisionResponse(
