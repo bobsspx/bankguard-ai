@@ -1,5 +1,12 @@
 # BankGuard AI progress
 
+## 2026-11-21 — Phase 9 Linux CI recovery
+
+- [Hosted run 44860799220](https://github.com/bobsspx/bankguard-ai/actions/runs/44860799220) on `cb0652b`: backend 350 passed and pip-audit clean. PostgreSQL 3 passed. Both npm installs failed with EUSAGE. Desktop and mobile E2E did not execute. Cleanup then failed on the missing `CI_BROWSER_AUTH_FILE`.
+- Regenerated `frontend/package-lock.json` with Linux Node 24.22.3 / npm 11.19.1. npm supplied missing shared `@emnapi/core` and `@emnapi/runtime` 1.11.3 entries. The manifest and existing locked package versions were preserved. In `.github/workflows/quality.yml` cleanup now follows a fixture creation attempt, including failed creation.
+- Clean Linux install passed with an unchanged lockfile checksum. Frontend tests, TypeScript, ESLint and production build passed. npm audit reported zero vulnerabilities. Workflow YAML, shell syntax and diff whitespace checked. Playwright discovered both required projects.
+- Phase 9 PARTIAL. Phase 8 owner acceptance pending. Next action is owner approval for one corrective push to main, then verify hosted jobs including authenticated desktop and 390px E2E.
+
 ## Phase 9 pre-push review
 
 - Reviewed `checkpoint/ml-shadow-review` at `b6f1e4f`. The index is empty and the branch is seven commits ahead of its local upstream tracking ref. Proposed first push is a new `ci/phase9-verification` branch on `origin` (`bobsspx/bankguard-ai`); read-only lookup found no existing branch by that name. The exact local manifest is `%TEMP%/bankguard-phase9-review-_jz87lir/commit-scope.txt`: 86 Phase 4–8 application, migration and regression dependencies, followed by 14 Phase 9 workflow, tooling and documentation paths. Local ML changes, Neon scripts and personal files are excluded. A limited credential pattern scan found zero matches in the candidates and seven outbound commit patches.

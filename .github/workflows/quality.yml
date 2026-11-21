@@ -75,6 +75,7 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
       - name: Create disposable browser fixture
+        id: browser_fixture
         working-directory: backend
         run: |
           export CI_BROWSER_AUTH_FILE="$RUNNER_TEMP/bankguard-browser-auth.json"
@@ -98,7 +99,7 @@ jobs:
         working-directory: frontend
         run: npm run test:e2e
       - name: Remove disposable browser fixture
-        if: always()
+        if: always() && (steps.browser_fixture.outcome == 'success' || steps.browser_fixture.outcome == 'failure')
         working-directory: backend
         run: python scripts/ci_browser_fixture.py cleanup
 
